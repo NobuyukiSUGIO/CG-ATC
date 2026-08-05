@@ -23,6 +23,11 @@ class _OpaqueBytes:
 
     __slots__ = ("_b",)
 
+    # Declared for the type-checker only: the slot is populated via
+    # object.__setattr__ (below) because __setattr__ is blocked.  A bare
+    # annotation creates no class attribute, so __slots__ stays intact.
+    _b: bytes
+
     def __init__(self, raw: bytes) -> None:
         if not isinstance(raw, (bytes, bytearray, memoryview)):
             raise TypeError(f"{type(self).__name__} requires bytes, got {type(raw).__name__}")
@@ -140,6 +145,9 @@ class SecretBytes:
     """
 
     __slots__ = ("_b",)
+
+    # Type-checker-only declaration; see the note on _OpaqueBytes._b.
+    _b: bytes
 
     def __init__(self, raw: bytes) -> None:
         if not isinstance(raw, (bytes, bytearray, memoryview)):

@@ -23,6 +23,7 @@ repos:
         additional_dependencies:
           - pydantic>=2.5
           - cryptography>=44
+          - types-PyYAML>=6.0
 
   - repo: local
     hooks:
