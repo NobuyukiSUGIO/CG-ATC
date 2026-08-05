@@ -55,6 +55,13 @@ python -m venv .venv && . .venv/bin/activate
 pip install -e ".[test,dev]"
 ```
 
+> **The virtual environment must stay activated for every command in this README.**
+> All commands below — and the `benchmarks/run_all_adaptive_experiments.sh` driver —
+> invoke `python` rather than `python3`. On distributions that ship only a `python3`
+> binary (Debian/Ubuntu and most CI images), running them without an activated venv
+> fails with `python: command not found`. Re-activate with `. .venv/bin/activate` in
+> each new shell.
+
 The core CG-ATC layer only needs `cryptography`, `pydantic`, and `PyYAML`. The
 `strands-agents` / `a2a-sdk` / `fastapi` / `httpx` dependencies are needed only for
 the A2A integration tests (`tests/e2e/`, `tests/integration/test_strands_chat.py`)
