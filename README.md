@@ -25,8 +25,10 @@ property-based tests under `tests/security/`.
 
 ## Layout
 
-See [`CLAUDE.md`](./CLAUDE.md) for the full implementation contract; the directory
-layout matches that document.
+See [`CLAUDE.md`](./CLAUDE.md) for how the paper maps onto the code, the conventions
+the code follows, and where the implementation falls short of what the paper
+specifies. [`docs/open_questions.md`](docs/open_questions.md) records the detailed
+interpretation gaps.
 
 ```
 cgatc/

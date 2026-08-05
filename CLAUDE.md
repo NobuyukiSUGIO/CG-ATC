@@ -1,8 +1,15 @@
 # CLAUDE.md
 
-This file provides guidance for working in this repository (originally written for
-Claude Code, claude.ai/code, but it doubles as the implementation contract for any
-contributor).
+This file documents **how the CG-ATC reference implementation in this repository is
+built**: how the paper maps onto the code, which conventions the code follows, and
+how the claims of the paper are exercised by the test suite.
+
+It describes the code as it stands. Where the implementation deliberately departs
+from, or falls short of, what the paper specifies, that is stated here explicitly
+rather than written as an aspiration; the detailed interpretation gaps are recorded
+in [`docs/open_questions.md`](docs/open_questions.md).
+
+The conventions in §4 are also the rules new contributions are expected to follow.
 
 ---
 
@@ -16,10 +23,16 @@ Systems" (Sugio, 2026)**.
 
 CG-ATC (Cryptographically Grounded Agent Trust and Containment) is a zero-trust
 security mechanism for LLM-based multi-agent systems running over the
-Agent-to-Agent (A2A) protocol. This implementation is not a research PoC: it aims
-to be a **production-oriented implementation** integrated with the real A2A
-protocol (Google A2A) and real cryptographic libraries (`cryptography`, PyNaCl,
-etc.).
+Agent-to-Agent (A2A) protocol.
+
+The implementation is a **research artifact**, not a hardened product. It is built
+on the real A2A protocol (`a2a-sdk`), the real Strands agent runtime
+(`strands-agents`), and established cryptographic libraries (`cryptography`,
+`hashlib`) rather than on mocks — but two primitives are stand-ins for what the
+paper assumes (threshold signatures and the VRF; see §4.2 and
+`docs/open_questions.md` Q3/Q4), and key management is in-process rather than
+KMS/HSM-backed. Treat it as an artifact that reproduces the paper's evaluation,
+not as deployable infrastructure.
 
 ### 1.2 Central claim (paper §IV)
 
@@ -79,15 +92,16 @@ number** explicitly in the docstring.
 ### 2.2 §III-I Security Properties — game-based formalization and theorems
 
 Paper §III-I defines four security properties via a **game-based formalism** and proves
-four corresponding theorems. These are implemented 1:1 in `tests/security/` as
-**game simulators + property tests**.
+four corresponding theorems. `tests/security/` has one file per theorem. The tests
+exercise the theorems' properties directly rather than simulating the games —
+see §5.2 for exactly what that does and does not establish.
 
 | Paper element | Equations | Implementation file | What is verified |
 |---|---|---|---|
 | Definition 1 / Theorem 1 / **Game 1: `Exp^{auth}_E(λ)`** | (21)-(26) | `tests/security/test_theorem1_message_authenticity.py` | Under EUF-CMA, messages of uncompromised agents are unforgeable |
-| Definition 2 / Theorem 2 / **Game 2: `Exp^{audit}_E(λ)`** | (27)-(31) | `tests/security/test_theorem2_auditability.py` | Under collision resistance + EUF-CMA, logs inconsistent with a valid execution trace are not accepted |
+| Definition 2 / Theorem 2 / **Game 2: `Exp^{audit}_E(λ)`** | (27)-(31) | `tests/security/test_theorem2_audit_tamper_evidence.py` | Under collision resistance + EUF-CMA, logs inconsistent with a valid execution trace are not accepted |
 | Definition 3 / Theorem 3 / **Game 3: `Exp^{cap}_E(λ)`** | (32)-(36) | `tests/security/test_theorem3_capability_bounded_damage.py` | With unforgeable capabilities and enforced verification at every protected resource, `Damage(A_i) ⊆ ∪ Scope(cap)` |
-| Definition 4 / Theorem 4 / **Game 4: `Exp^{thr}_E(λ)`** | (37)-(39) | `tests/security/test_theorem4_threshold_protected_action.py` | Under threshold-signature unforgeability, an adversary with `|C_P| < k` cannot authorize high-risk actions |
+| Definition 4 / Theorem 4 / **Game 4: `Exp^{thr}_E(λ)`** | (37)-(39) | `tests/security/test_theorem4_threshold_protected_actions.py` | Under threshold-signature unforgeability, an adversary with `|C_P| < k` cannot authorize high-risk actions |
 
 Each game is implemented as a **challenger-adversary protocol** (see §5.2).
 
@@ -174,28 +188,30 @@ def verify_envelope(m: Envelope, sig: bytes, pk: bytes) -> bool:
 
 ### 3.2 Directory layout
 
+The tree below is the actual layout of the repository.
+
 ```
-cg-atc/
+CG-ATC/
 ├── CLAUDE.md                         # this file
 ├── README.md
-├── pyproject.toml                    # uv or poetry
+├── LICENSE                           # Apache-2.0
+├── pyproject.toml                    # setuptools; deps + ruff/mypy/pytest config
 ├── .pre-commit-config.yaml
 ├── docs/
-│   ├── paper_mapping.md              # paper ↔ code mapping (detailed)
+│   ├── paper_mapping.md              # paper ↔ code mapping (§III-A ... §III-L)
 │   ├── threat_model.md               # detailed threat model (§III-A, §III-I)
-│   └── game_specifications.md        # implementation spec for Games 1-4
-├── paper/
-│   └── main.tex                      # paper source (for reference)
+│   ├── open_questions.md             # interpretation gaps vs. the paper
+│   └── spec_additional_experiments_and_baselines.pdf   # adaptive-attack spec (Japanese)
 ├── cgatc/                            # main package
-│   ├── __init__.py
 │   ├── core/
-│   │   ├── types.py                  # AgentID, TaskID, SessionID, etc. (§III-A)
+│   │   ├── types.py                  # AgentID, TaskID, SessionID, SecretBytes (§III-A)
 │   │   ├── exceptions.py             # CG-ATC-specific exceptions
-│   │   └── constants.py
+│   │   └── constants.py              # τ thresholds, λ decay, α/β/γ/δ weights
 │   ├── crypto/
 │   │   ├── primitives.py             # thin wrappers for H(), Sign(), Verify(), AE
-│   │   ├── threshold.py              # k-of-n threshold signatures (FROST etc.) (§III-H-3)
-│   │   └── vrf.py                    # verifiable random function (§III-H-3, Eq. (18))
+│   │   ├── kex.py                    # X25519 session-key agreement
+│   │   ├── threshold.py              # k-of-n threshold authorization (§III-H-3)
+│   │   └── vrf.py                    # verifiable-random-function stand-in (§III-H-3, Eq. (18))
 │   ├── identity/                     # §III-C
 │   │   ├── agent_card.py             # build/sign/verify Card_i (Eq. (4)-(5))
 │   │   ├── attestation.py            # envHash, EnvAttest
@@ -221,123 +237,95 @@ cg-atc/
 │   │   ├── impact_radius.py          # Impact(A_i, t) computation (Eq. (16))
 │   │   └── threshold_authz.py        # threshold authorization (Eq. (17)), VRF committee (Eq. (18))
 │   ├── a2a_integration/              # §III-J
-│   │   ├── headers.py                # A2A-Agent-ID, A2A-Signature, and 4 more headers
-│   │   ├── middleware.py             # extension layer over Google A2A
+│   │   ├── headers.py                # the 6 A2A extension headers
+│   │   ├── middleware.py             # send/receive extension layer
+│   │   ├── asgi_middleware.py        # ASGI hook for FastAPI/uvicorn JSON-RPC servers
+│   │   ├── strands_bridge.py         # binding to strands-agents / a2a-sdk
 │   │   └── workflow.py               # the 11-step workflow of §III-J
 │   ├── policy/
-│   │   ├── policy_dsl.py             # DSL parser for policy Π
+│   │   ├── policy_dsl.py             # DSL parser for policy Π (dict + YAML front-ends)
 │   │   └── evaluator.py
-│   └── baselines/                    # for the §III-L baseline comparison
+│   └── baselines/                    # the 5 baselines of §III-L
+│       ├── base.py                   # common pluggable interface
 │       ├── auth_only.py
 │       ├── tls_oauth.py
 │       ├── cap_no_audit.py
-│       └── anomaly_no_crypto.py
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   ├── security/                     # game-based property tests for §III-I Games 1-4
-│   │   ├── games/
-│   │   │   ├── challenger.py         # shared challenger infrastructure
-│   │   │   ├── adversary.py          # adversary interface
-│   │   │   ├── game1_auth.py         # Exp^{auth}_E(λ) simulator
-│   │   │   ├── game2_audit.py        # Exp^{audit}_E(λ) simulator
-│   │   │   ├── game3_cap.py          # Exp^{cap}_E(λ) simulator
-│   │   │   └── game4_thr.py          # Exp^{thr}_E(λ) simulator
+│       ├── anomaly_no_crypto.py
+│       └── cgatc_full.py
+├── tests/                            # 150 tests, all green
+│   ├── unit/                         # 113 tests, incl. RFC 8032 KATs
+│   ├── integration/                  # 3 tests — A2A workflow, Strands chat
+│   ├── security/                     # 18 tests — Theorems 1-4 (see §5.2)
 │   │   ├── test_theorem1_message_authenticity.py
-│   │   ├── test_theorem2_auditability.py
+│   │   ├── test_theorem2_audit_tamper_evidence.py
 │   │   ├── test_theorem3_capability_bounded_damage.py
-│   │   └── test_theorem4_threshold_protected_action.py
-│   └── adversarial/                  # concrete scenarios for the 9 attacks of §III-A
-│       ├── test_impersonation.py
-│       ├── test_replay.py
-│       ├── test_forged_card.py
-│       ├── test_privilege_escalation.py
-│       ├── test_prompt_propagation.py
-│       ├── test_collusion.py
-│       ├── test_memory_poisoning.py
-│       ├── test_audit_tampering.py
-│       └── test_cascading_failure.py
-├── experiments/                      # §III-L evaluation scripts
+│   │   └── test_theorem4_threshold_protected_actions.py
+│   ├── adversarial/                  # 13 tests — attack scenarios (see §5.3)
+│   │   ├── test_impersonation.py
+│   │   ├── test_replay.py
+│   │   ├── test_collusion.py
+│   │   ├── test_memory_poisoning.py
+│   │   ├── test_worm_propagation.py
+│   │   └── test_contagious_jailbreak.py
+│   └── e2e/                          # 3 tests — HTTP JSON-RPC full path
+├── experiments/                      # §III-L evaluation scripts (take no arguments)
 │   ├── bench_crypto_overhead.py
 │   ├── bench_audit_overhead.py
 │   ├── eval_detection_perf.py
 │   ├── eval_containment_perf.py
-│   ├── eval_robustness.py
-│   ├── eval_deployability.py
-│   └── compare_baselines.py
+│   ├── compare_baselines.py
+│   ├── scale_eval.py                 # 10 / 100 / 1000 agents
+│   ├── workloads/                    # benign.py, adversarial.py (seeded)
+│   └── plotting/                     # CSV → figure, pure functions
+├── benchmarks/                       # adaptive-attack suite (8 workloads × 10 baselines)
+│   ├── run_adaptive_attacks.py       # one (workload, baseline) combination
+│   ├── run_all_adaptive_experiments.sh
+│   ├── audit_tampering_experiment.py
+│   ├── tables.py                     # Tables A/B/C
+│   ├── runner.py, interfaces.py, materialize.py
+│   ├── workloads/                    # the 8 adaptive workloads
+│   └── baselines/                    # cg_atc + 5 stronger baselines + legacy 4
+├── results/                          # committed outputs; each run carries meta.json
 └── examples/
-    ├── two_agent_handshake.py
+    ├── two_agent_handshake.py        # CG-ATC layer only, no LLM
     ├── multi_agent_topology.py
-    └── adversarial_demo.py
+    ├── adversarial_demo.py
+    ├── two_agent_chat.py             # real strands.Agent + deterministic stub model
+    ├── _stub_model.py
+    └── with_bedrock/                 # real strands.Agent + AWS Bedrock
 ```
 
-### 3.3 Implementation phases
+Not present, though an earlier revision of this document called for them:
+`paper/main.tex` (the manuscript is not distributed here — see §8),
+`docs/game_specifications.md`, `experiments/eval_robustness.py` and
+`eval_deployability.py` (those two axes are covered by `tests/adversarial/` +
+`benchmarks/` and by `tests/e2e/` + `examples/` respectively; see §6.1), and
+`tests/security/games/` (see §5.2). `tests/fixtures/kat/` exists but is empty —
+the known-answer vectors are inline in the tests (§5.5).
 
-Given the dependencies in the paper, strictly follow a **bottom-up order**. Do not
-write code for an upper layer until the lower layers pass their game-based property
-tests.
+### 3.3 Layering and implementation status
 
-**Phase 0: Foundations** *(starting point)*
-- `cgatc/core/types.py`: domain types (AgentID, TaskID, SessionID, Timestamp,
-  representation of the adversary model `C ⊆ A`)
-- `cgatc/crypto/primitives.py`: thin wrappers for hashing, signatures, and AE
-  (Ed25519 recommended, using `cryptography`)
-- `tests/security/games/challenger.py` and `adversary.py`: game-simulator
-  infrastructure
-- Unit tests: must include known-answer tests (KATs)
+The package was built bottom-up, and the layering is still the reason the modules
+depend on each other in the direction they do: nothing in an upper layer is allowed
+to reach around a lower one. The table records what each layer contains and how far
+it matches the paper.
 
-**Phase 1: Identity and Agent Card (§III-C, Eq. (2)-(5))**
-- Key pair generation, `compute_agent_id`, `Card`, `sign_card`, `verify_card`
-- `Expiry` validation, certificate-chain verification stub
-- Property tests: forged Cards are always rejected, legitimate Cards are always
-  accepted
+| Layer | Modules | Paper | Status |
+|---|---|---|---|
+| 0. Foundations | `core/types.py`, `core/exceptions.py`, `core/constants.py`, `crypto/primitives.py`, `crypto/kex.py` | §III-A | Complete. Ed25519 / SHA-256 / ChaCha20-Poly1305 via `cryptography`; RFC 8032 known-answer tests in `tests/unit/test_crypto_primitives.py` |
+| 1. Identity | `identity/{agent_card,attestation,keystore}.py` | §III-C, Eq. (2)-(5) | Complete. `compute_agent_id`, `sign_card`, `verify_card`, expiry checks. Certificate-chain verification is a stub; keys live in process (§4.6) |
+| 2. Messaging | `messaging/{envelope,chain,replay_guard}.py` | §III-D, Eq. (6)-(8) | Complete. Signed envelope, `prevHash` chain, `seq` monotonicity, timestamp freshness |
+| 3. Capability | `capability/{token,authority,enforcer}.py` | §III-E, Eq. (9)-(10) | Complete. `cap_{i,j,t}`, `σ_PA` issuance, scope/constraint/expiry/audience checks, default-deny `Allow(i, a, cap)` |
+| 4. Audit | `audit/{hashchain,merkle,committer}.py` | §III-F, Eq. (11)-(13) | Complete. `L_i^t`, `root_i^t`, inclusion proofs, signed commitment `Σ_i^t`, `verify()` for tamper detection |
+| 5. Detection | `detection/{crypto_detector,behavioral_detector,risk_score}.py` | §III-G, Eq. (14) | Complete. 10 cryptographic conditions, behavioral detectors, `R_i^{t+1}`. The aggregation of `B_i^t` is an interpretation — see `open_questions.md` Q2 |
+| 6. Containment | `containment/{scope_reducer,impact_radius,threshold_authz}.py`, `crypto/{threshold,vrf}.py` | §III-H, Eq. (15)-(18) | Functionally complete, **two primitives are stand-ins**: the k-of-n scheme is a Schnorr-style multi-signature proxy, not FROST, and the committee VRF is a signature-derived shuffle, not RFC 9381 (Q3/Q4) |
+| 7. A2A integration | `a2a_integration/*` | §III-J | Complete. 6 extension headers, 11-step workflow, ASGI middleware, `strands-agents` / `a2a-sdk` binding; exercised by `tests/e2e/` |
+| 8. Evaluation | `experiments/`, `benchmarks/`, `baselines/` | §III-L | Complete. See §6; all committed results under `results/` regenerate from a fixed seed |
 
-**Phase 2: Message envelope (§III-D, Eq. (6)-(8))**
-- Signed envelope, `prevHash` chain, `seq` monotonicity, `timestamp` freshness
-- Implement the **Game 1 simulator** in `tests/security/games/game1_auth.py`
-- Property test: **Theorem 1 (message authenticity)** —
-  `Pr[Exp^{auth}_E(λ) = 1] ≤ negl(λ)`
-
-**Phase 3: Capability tokens (§III-E, Eq. (9)-(10))**
-- `cap_{i,j,t}` structure, issuance and signing `σ_PA` by the Policy Authority
-- Verification of scope, the 8 constraint kinds, expiry, and audience binding
-- Enforcement layer (`Allow(i, a, cap) = 1`, §III-I Eq. (32))
-- Implement the **Game 3 simulator** in `tests/security/games/game3_cap.py`
-- Property test: **Theorem 3 (capability-bounded damage)** —
-  `Damage(A_i) ⊆ ∪ Scope(cap)`
-
-**Phase 4: Audit log (§III-F, Eq. (11)-(13))**
-- Hash chain `L_i^t`, Merkle root `root_i^t`, signed commitment `Σ_i^t`
-- Implement the `VerifyLog` function (referenced by Game 2)
-- Implement the **Game 2 simulator** in `tests/security/games/game2_audit.py`
-- Property test: **Theorem 2 (auditability)** — dual protection by tamper detection
-  and signature unforgeability
-
-**Phase 5: Detection (§III-G)**
-- Cryptographic detection (10 conditions enumerated in §III-G-1)
-- Behavioral detection (8 examples in §III-G-2) and risk score `R_i^{t+1}` (Eq. (14))
-- Parameters `λ, α, β, γ, δ` and threshold `τ_1` are externalized into a config file
-
-**Phase 6: Containment (§III-H)**
-- Dynamic scope reduction (Eq. (15), 7-stage graduated containment)
-- Control of the impact radius `r` and computation of `Impact(A_i, t)` (Eq. (16))
-- Threshold signatures (FROST etc.) and VRF committee selection (Eq. (17)-(18))
-- Implement the **Game 4 simulator** in `tests/security/games/game4_thr.py`
-- Property test: **Theorem 4 (threshold-protected critical action)** — an adversary
-  with `|C_P| < k` cannot authorize
-
-**Phase 7: A2A integration (§III-J)**
-- The 6 A2A extension headers (`A2A-Agent-ID`, `A2A-Signature`,
-  `A2A-Capability-Token`, `A2A-Prev-Hash`, `A2A-Log-Root`, `A2A-Risk-Level`)
-- Implement the 11-step workflow in `workflow.py`
-- Middleware integration with Google A2A's JSON-RPC / SSE
-- End-to-end integration tests
-
-**Phase 8: Evaluation (§III-L)**
-- The 6 evaluation axes (detection performance, containment performance,
-  cryptographic overhead, audit overhead, robustness, deployability)
-- Comparison against the 5 baselines (`auth_only`, `tls_oauth`, `cap_no_audit`,
-  `anomaly_no_crypto`, `cgatc_full`)
+Parameters `λ, α, β, γ, δ` and the thresholds `τ` are defined in
+`cgatc/core/constants.py` and are overridable per-instance at construction time.
+`cgatc/detection/risk_score.py` refers to a `examples/configs/risk.yaml` config
+file that is not currently shipped; the weights are set programmatically instead.
 
 ---
 
@@ -352,20 +340,31 @@ tests.
 
 ### 4.2 Cryptographic library policy
 
-**Hand-rolled cryptography is strictly forbidden.** Use the established libraries
-below:
+**No primitive is hand-rolled.** Every cryptographic operation delegates to an
+established library:
 
-| Purpose | Recommended library | Assumption in the paper |
+| Purpose | What the code uses | Assumption in the paper |
 |---|---|---|
-| Signatures (Ed25519) | `cryptography` or `PyNaCl` | EUF-CMA (§III-A, Theorem 1) |
-| Hashing (SHA-256/SHA-3) | `hashlib` (stdlib) | Collision resistance (Theorem 2) |
+| Signatures (Ed25519) | `cryptography` | EUF-CMA (§III-A, Theorem 1) |
+| Hashing (SHA-256) | `hashlib` (stdlib) | Collision resistance (Theorem 2) |
 | AE (ChaCha20-Poly1305) | `cryptography` | Confidentiality + integrity (§III-A) |
-| Threshold signatures | `frost-ed25519` etc. | Unforgeability (Theorem 4) |
-| VRF | RFC 9381-conformant library | Pseudorandomness + verifiability (§III-A) |
-| Merkle tree | `pymerkle` or a thin in-house one | Reduces to collision resistance (Theorem 2) |
+| Key agreement (X25519) | `cryptography` | — (`crypto/kex.py`, session keys) |
+| Merkle tree | thin in-house over `hashlib` | Reduces to collision resistance (Theorem 2) |
+| Threshold signatures | **stand-in**: `k` independent Ed25519 signatures over the same message (`crypto/threshold.py`) | Unforgeability (Theorem 4) |
+| VRF | **stand-in**: Ed25519 signature over the seed, shuffle derived from `H(σ)` (`crypto/vrf.py`) | Pseudorandomness + verifiability (§III-A) |
 
-**Key management**: during development, use the OS keychain or an encrypted file; for
-production, factor this out behind an interface that assumes KMS / HSM integration.
+The last two rows are the honest caveat of this artifact. The multi-signature proxy
+does satisfy the property Theorem 4 needs — no coalition of `k-1` can authorize —
+but it is not FROST, so it has none of FROST's round efficiency or signature
+compactness. The VRF stand-in produces an unforgeable, deterministic, publicly
+verifiable output, but it is not an RFC 9381 VRF and has no formal VRF proof
+structure. Both are isolated behind narrow interfaces so a real FROST / RFC 9381
+backend can replace them without touching call sites. See `docs/open_questions.md`
+Q3 and Q4.
+
+**Key management**: keys are generated and held in process (`identity/keystore.py`),
+wrapped in `SecretBytes`. There is no KMS / HSM integration; the keystore interface
+is the seam where one would be added.
 
 ### 4.3 Design principles
 
@@ -407,10 +406,12 @@ The 7 principles of paper §III-B translated into coding rules:
 
 ### 4.6 Handling of secrets
 
-- Never expose secret keys in `__repr__` / `__str__` / log output (use the
-  `SecretBytes` wrapper type)
-- Do not hard-code test keys into the repository (`.gitignore` `tests/fixtures/keys/`
-  and provide a generation script)
+- Secret keys are never exposed in `__repr__` / `__str__` / log output: they are
+  wrapped in `SecretBytes` (`core/types.py`), whose `__repr__` prints only the
+  length and whose `__eq__` is constant-time
+- No key material is committed. Tests generate ephemeral key pairs at run time, so
+  there is no fixture directory to protect; `.gitignore` still excludes
+  `tests/fixtures/keys/` and `*.pem` / `*.key` as a guard
 
 ---
 
@@ -422,195 +423,219 @@ The 7 principles of paper §III-B translated into coding rules:
 |---|---|---|
 | Unit | `tests/unit/` | Behavior of individual functions and classes |
 | Integration | `tests/integration/` | Cross-module interaction (e.g. issue → sign → verify → audit) |
-| **Game-based property** | `tests/security/` | **Verification of Games 1-4 and Theorems 1-4 of paper §III-I** |
-| Adversarial scenarios | `tests/adversarial/` | Concrete reproduction of the 9 attacks of §III-A and confirmation of defenses |
+| **Security properties** | `tests/security/` | **The four theorems of paper §III-I, one file per theorem (18 tests)** |
+| Adversarial scenarios | `tests/adversarial/` | Concrete attack scenarios from §III-A and confirmation of defenses (13 tests) |
 | E2E | `tests/e2e/` | Full path over the A2A protocol |
 
-### 5.2 Game-based property tests (most important, corresponds to §III-I)
+### 5.2 Security-property tests (§III-I, Theorems 1-4)
 
-Paper §III-I formalizes Games 1-4 as challenger-adversary protocols. Implement these
-faithfully in Python.
+Paper §III-I formalizes four security properties as challenger-adversary games
+(`Exp^{auth}`, `Exp^{audit}`, `Exp^{cap}`, `Exp^{thr}`) and proves Theorems 1-4
+against them. `tests/security/` contains one file per theorem, 18 tests in total.
 
-#### 5.2.1 Shared challenger-adversary infrastructure
+**What the tests actually do — and what they do not.** They are *direct property
+tests*, not game simulators. There is no `Challenger` class, no signing oracle, no
+corrupt-set bookkeeping, and no `hypothesis` fuzzing. Each file instead fixes the
+adversary's capability by construction — the adversary is handed everything except
+the honest secret key — and asserts that the enforcement path rejects every attempt.
+For example, `test_theorem1_message_authenticity.py` states its operationalisation
+directly:
 
-```python
-# tests/security/games/challenger.py
-class Challenger:
-    """Challenger for security games defined in Sugio 2026, §III-I.
+> The adversary may see arbitrary signed envelopes from Alice, pick any payload,
+> headers, sequence numbers, but does NOT know Alice's secret key. For ANY
+> envelope/signature pair the adversary can produce, `verify_envelope` MUST reject
+> it. We do not attempt to *break* Ed25519; we test the integration: that we never
+> inadvertently provide an oracle that returns a valid envelope without the secret
+> key.
 
-    Initializes CG-ATC with security parameter λ, policy Π, and agent set A.
-    Provides oracles for the adversary subject to protocol rules.
-    """
-    def __init__(self, lam: int, policy: Policy, agents: list[AgentID]): ...
-    def corrupt(self, agent_ids: set[AgentID]) -> dict[AgentID, SecretKey]: ...
-    def signing_oracle(self, agent_id: AgentID, m: Envelope) -> bytes: ...
-    # ...
+That is the honest scope of all four files. They establish that **CG-ATC's own
+enforcement layer contains no bypass** — no code path accepts a forged envelope, a
+tampered log, an out-of-scope capability, or a sub-threshold authorization. They do
+**not** establish the cryptographic reductions themselves: `Pr[Exp_E(λ) = 1] ≤
+negl(λ)` follows from EUF-CMA, collision resistance and threshold unforgeability,
+which are assumed, not tested. Breaking Ed25519 is out of scope by construction.
 
-class Adversary(ABC):
-    """Adversary interface used in Game 1-4."""
-    @abstractmethod
-    def attack(self, challenger: Challenger) -> Any: ...
-```
+| Theorem | File | Property exercised |
+|---|---|---|
+| 1 — Message authenticity (§III-D-1) | `test_theorem1_message_authenticity.py` | No envelope verifies under Alice's `pk` without Alice's `sk`; tampering any field invalidates the signature |
+| 2 — Tamper-evident auditability (§III-F, §III-I) | `test_theorem2_audit_tamper_evidence.py` | Deleting, modifying, reordering or inserting log entries is detected by the hash chain / Merkle root |
+| 3 — Capability-bounded damage (§III-E, §III-I) | `test_theorem3_capability_bounded_damage.py` | A corrupted agent cannot act outside `∪ Scope(cap)`; wrong audience/subject/task/expiry are all denied |
+| 4 — Threshold-protected actions (§III-H-3, §III-I) | `test_theorem4_threshold_protected_actions.py` | Fewer than `k` signers cannot authorize a high-risk action |
 
-#### 5.2.2 Game 1: message authenticity (§III-I Eq. (21)-(26))
-
-```python
-# tests/security/games/game1_auth.py
-def run_game1(challenger: Challenger, adversary: Adversary) -> bool:
-    """Simulate Exp^{auth}_E(λ) per Sugio 2026, §III-I Game 1.
-
-    Adversary wins iff:
-      (a) Verify_{pk_i}(H(m*), σ*) = 1   [Eq. (24)]
-      (b) senderID* = ID_i for some A_i ∉ C
-      (c) m* was never signed by A_i during the experiment
-      (d) the system would accept (m*, σ*) as a valid A2A message from A_i
-    """
-    # ... corrupt set selection, oracle interaction, verification
-```
-
-```python
-# tests/security/test_theorem1_message_authenticity.py
-from hypothesis import given, strategies as st, settings
-
-@given(num_agents=st.integers(min_value=2, max_value=20),
-       num_corrupted=st.integers(min_value=0, max_value=5))
-@settings(max_examples=200)
-def test_theorem1_no_ppt_adversary_wins(num_agents, num_corrupted):
-    """Theorem 1 (Sugio 2026, §III-I): Under EUF-CMA security of the underlying
-    signature scheme, CG-ATC satisfies message authenticity, i.e.,
-        Pr[Exp^{auth}_E(λ) = 1] ≤ negl(λ).
-
-    We approximate the negligible bound by checking that across many
-    randomized adversary runs, no PPT-bounded adversary (modeled as a
-    fixed-query-budget attacker without access to honest signing keys)
-    can produce a winning forgery.
-    """
-    challenger = Challenger.setup(num_agents=num_agents)
-    challenger.corrupt(select_corrupted(num_corrupted))
-    adversary = PPTBoundedForgeryAdversary(query_budget=1000)
-    assert not run_game1(challenger, adversary)
-```
-
-#### 5.2.3 Games 2-4 follow the same challenger-adversary pattern
-
-- **Game 2** (§III-I Eq. (27)-(31)): implementing the `VerifyLog` function is mandatory.
-  Confirm that tampered logs are not accepted.
-- **Game 3** (§III-I Eq. (32)-(36)): build the assumption that the Policy Authority is
-  uncorrupted into the challenger. Confirm that a corrupted agent cannot execute
-  protected actions outside `∪ Scope(cap)`.
-- **Game 4** (§III-I Eq. (37)-(39)): enforce the adversary constraint `|C_P| < k` on the
-  challenger side and confirm that no valid threshold signature can be produced.
-
-**Important**: the adversary in each game is a "simulation of the PPT constraint",
-limited by query and computation budgets. Since negligible probability cannot be
-demonstrated in practice, we accumulate **negative evidence** (i.e. the adversary
-cannot win within its query budget) over many hypothesis trials.
-
-Place at least one property test per game (1-4). **An implementation without a game
-simulator and property test corresponding to its theorem is not considered
-complete.**
+Building explicit `Challenger` / `Adversary` game simulators, driven by `hypothesis`
+over randomized corrupt sets and query budgets, would make the correspondence to
+§III-I's formalism literal rather than argued. It remains future work; the current
+tests cover the same properties at a coarser granularity.
 
 ### 5.3 Adversarial scenario tests
 
-Create one test file per attack enumerated in paper §III-A:
+Paper §III-A enumerates nine attack vectors. All nine are covered, but not by nine
+dedicated files in `tests/adversarial/`: four are covered where the defending
+mechanism lives instead. The table below is the real mapping.
 
-| Attack (§III-A) | Test file | Expected result |
+| Attack (§III-A) | Where it is covered | Expected result |
 |---|---|---|
-| impersonating another agent | `test_impersonation.py` | Game 1 violation detected → rejected |
-| modifying or replaying A2A messages | `test_replay.py` | Rejected by replay_guard |
-| publishing a forged or misleading Agent Card | `test_forged_card.py` | Rejected by Card signature verification |
-| requesting tasks beyond authorized privileges | `test_privilege_escalation.py` | Rejected by the enforcer (Theorem 3) |
-| propagating malicious prompts or poisoned contents | `test_prompt_propagation.py` | Suppressed by impact_radius |
-| colluding with other compromised agents | `test_collusion.py` | Suppressed by threshold signatures (Theorem 4) |
-| injecting false information into shared memory | `test_memory_poisoning.py` | Behavioral detection + risk-score increase |
-| attempting to erase or modify audit traces | `test_audit_tampering.py` | Detected via Theorem 2 |
-| causing cascading failures through delegated tasks | `test_cascading_failure.py` | Contained by impact_radius + scope_reducer |
+| impersonating another agent | `tests/adversarial/test_impersonation.py` | Signature verification fails → rejected |
+| modifying or replaying A2A messages | `tests/adversarial/test_replay.py` | Rejected by `replay_guard` (nonce/seq/freshness) |
+| colluding with other compromised agents | `tests/adversarial/test_collusion.py` | Contained; high-risk action needs `k` signers (Theorem 4) |
+| injecting false information into shared memory | `tests/adversarial/test_memory_poisoning.py` | Behavioral detection + risk-score increase |
+| propagating malicious prompts or poisoned contents | `tests/adversarial/test_worm_propagation.py`, `test_contagious_jailbreak.py` | Suppressed by impact radius + scope reduction |
+| causing cascading failures through delegated tasks | `tests/adversarial/test_worm_propagation.py`; `experiments/eval_containment_perf.py` | Contained by `impact_radius` + `scope_reducer` |
+| publishing a forged or misleading Agent Card | `tests/unit/test_identity.py` | Rejected by Card signature verification |
+| requesting tasks beyond authorized privileges | `tests/unit/test_capability.py`, `tests/security/test_theorem3_capability_bounded_damage.py` | Rejected by the enforcer, default-deny (Theorem 3) |
+| attempting to erase or modify audit traces | `tests/security/test_theorem2_audit_tamper_evidence.py`, `benchmarks/audit_tampering_experiment.py` | Detected by hash chain / Merkle root (Theorem 2) |
 
 Each test asserts either "the attack does not succeed" or "the attack is always
-detected/contained".
+detected/contained". The adaptive, semantically-varying versions of these attacks —
+paraphrased worms, delayed and semantic replay, multi-hop indirect prompt injection
+— live in `benchmarks/workloads/` rather than here, because they are measured
+(attack success rate, TPR/FPR, propagation depth) rather than asserted; see §6.5.
 
 ### 5.4 Coverage
 
-- Line: 90% or higher
-- Branch: 85% or higher
-- Security-critical paths (`crypto/`, `identity/`, `capability/`, `audit/`): target
-  100%
-- Measure coverage with `pytest --cov=cgatc --cov-branch`
+Measured with `PYTHONPATH=. pytest --cov=cgatc --cov-branch`:
 
-### 5.5 Vector tests
+**85% overall** (1829 statements, 216 missed; 360 branches, 73 partial).
 
-Cryptographic primitives must always include known-answer tests (KATs). Place RFC and
-NIST test vectors under `tests/fixtures/kat/` (Ed25519: RFC 8032, SHA-256: NIST CAVP,
-VRF: RFC 9381).
+By area, so the gaps are visible rather than averaged away:
+
+| Area | Coverage | Note |
+|---|---|---|
+| `capability/` | 93-100% | `authority.py` 100%, `enforcer.py` 93% |
+| `audit/` | 80-96% | `committer.py` 80% is the weakest |
+| `messaging/` | 91-98% | |
+| `identity/` | 59-88% | **`keystore.py` 59%** — persistence paths are unexercised |
+| `crypto/` | 75-93% | **`threshold.py` 75%** — the multi-signature stand-in has untested error paths |
+| `detection/` | 72-93% | **`behavioral_detector.py` 72%** |
+| `containment/` | 86-95% | |
+| `a2a_integration/` | 38-100% | **`strands_bridge.py` 38%** — needs a live Strands/Bedrock session |
+| `baselines/` | 46-100% | comparison scaffolding, not part of the scheme |
+
+The security-critical paths are not at 100%; `crypto/threshold.py` and
+`identity/keystore.py` are the two that most deserve attention, and both are in the
+areas §4.2 already flags as stand-in or non-production.
+
+### 5.5 Known-answer tests
+
+Cryptographic primitives carry known-answer tests. Ed25519 is checked against
+RFC 8032 §7.1 TEST 1 in `tests/unit/test_crypto_primitives.py`, with the vector
+inline in the test rather than in a fixture file. `tests/fixtures/kat/` exists but
+is empty; there are currently no NIST CAVP (SHA-256) or RFC 9381 (VRF) vectors —
+the latter would not apply anyway, since the VRF is a stand-in (§4.2).
 
 ---
 
 ## 6. Experiment and evaluation script layout
 
-Scripts corresponding to the evaluation axes of paper §III-L live in `experiments/`.
+Evaluation is split across two suites. `experiments/` covers the six axes of
+paper §III-L. `benchmarks/` is the later adaptive-attack suite, specified in
+`docs/spec_additional_experiments_and_baselines.pdf` and described in §6.5.
 
-### 6.1 Evaluation axes and scripts (enumerated in §III-L)
+### 6.1 Evaluation axes and scripts (§III-L)
 
-| Evaluation axis | Script | Output |
+Every script in `experiments/` takes **no command-line arguments** — it runs a fixed,
+seeded configuration and writes to `results/<YYYYMMDD>_<experiment>/`. Passing
+`--help` runs the experiment rather than printing usage.
+
+| Evaluation axis | Script | Output directory |
 |---|---|---|
-| **Detection performance** (TPR, FPR, latency) | `eval_detection_perf.py` | `results/detection_*.csv`, ROC curve |
-| **Containment performance** (affected agents, propagation depth, damage radius) | `eval_containment_perf.py` | `results/containment_*.csv`, propagation graph |
-| **Cryptographic overhead** (signing/verification latency, throughput, message size) | `bench_crypto_overhead.py` | `results/crypto_bench.json` |
-| **Audit overhead** (storage cost, Merkle proof size, log verification time) | `bench_audit_overhead.py` | `results/audit_bench.json` |
-| **Robustness** (replay, impersonation, collusion, worm prompts, contagious jailbreaks, memory poisoning) | `eval_robustness.py` (+ `tests/adversarial/`) | Success rate per attack |
-| **Practical deployability** (A2A JSON-RPC, HTTP, streaming compatibility) | `eval_deployability.py` + `examples/` | Integration test report |
+| **Detection performance** (TPR, FPR, latency) | `eval_detection_perf.py` | `results/<date>_detection_perf/` |
+| **Containment performance** (affected agents, propagation depth, damage radius) | `eval_containment_perf.py` | `results/<date>_containment_perf/` |
+| **Cryptographic overhead** (sign/verify latency, throughput, message size) | `bench_crypto_overhead.py` | `results/<date>_crypto_bench/` |
+| **Audit overhead** (append cost, Merkle proof size, verification time) | `bench_audit_overhead.py` | `results/<date>_audit_bench/` |
+| **Robustness** (replay, impersonation, collusion, worms, contagious jailbreaks, memory poisoning) | `tests/adversarial/` + `benchmarks/` (§6.5) | pass/fail; per-attack success rate |
+| **Practical deployability** (A2A JSON-RPC, HTTP, streaming) | `tests/e2e/test_http_jsonrpc.py` + `examples/` | pass/fail |
+| Scale (10 / 100 / 1000 agents) | `scale_eval.py` | `results/<date>_scale_eval/` |
 
-### 6.2 Baseline comparison (enumerated in §III-L)
+The last two axes have no dedicated `eval_robustness.py` / `eval_deployability.py`
+driver: robustness is asserted by the adversarial tests and *measured* by the
+adaptive-attack suite, and deployability is demonstrated by the e2e tests and the
+runnable examples.
 
-Make the 5 baselines switchable via `compare_baselines.py`:
+### 6.2 Baseline comparison (§III-L)
+
+The five baselines of §III-L are implemented pluggably under `cgatc/baselines/`
+behind the common interface in `base.py`, and compared on an identical workload by
+`experiments/compare_baselines.py`:
 
 1. **`auth_only`**: A2A with authentication only
-2. **`tls_oauth`**: TLS and OAuth-based access control
+2. **`tls_oauth`**: TLS and OAuth-style bearer-token access control
 3. **`cap_no_audit`**: capability control without tamper-evident logging
 4. **`anomaly_no_crypto`**: anomaly detection without cryptographic evidence
 5. **`cgatc_full`**: the full CG-ATC scheme
 
-Implement each baseline pluggably under `cgatc/baselines/` and compare them on an
-identical workload.
+The adaptive-attack suite adds five stronger baselines on top of these (§6.5).
 
 ### 6.3 Workload generation
 
-Provide the following under `experiments/workloads/`:
+`experiments/workloads/` holds the §III-L workloads: `benign.py` (delegation chains,
+parallel queries, long-lived sessions) and `adversarial.py` (single attacker,
+collusion, worm prompts, memory poisoning). `scale_eval.py` drives them at
+10 / 100 / 1000 agents.
 
-- Benign workloads: task-delegation chains, parallel queries, long-lived sessions
-- Adversarial workloads: single attacker, collusion (2-3 agents), worm prompts,
-  memory poisoning
-- Scales: 10 / 100 / 1000 agents
-
-Workloads take a deterministic seed to guarantee reproducibility.
+Every generator takes a deterministic seed and builds its own `random.Random(seed)`.
+This is what makes the committed results reproducible — it is not a lapse in
+cryptographic hygiene, and these call sites must not be "fixed" to use `secrets`.
 
 ### 6.4 Recording results
 
-- All experiment results are stored under `results/<YYYYMMDD>_<experiment>/`
-- Metadata (Python version, library versions, hardware, random seed, CG-ATC commit
-  hash) must always be recorded in `meta.json`
-- Figure generation is separated into `experiments/plotting/` and written as pure
-  functions from CSV → PDF/PNG
+- Results are stored under `results/<YYYYMMDD>_<experiment>/`; the adaptive-attack
+  runs use `results/adaptive/<YYYYMMDD>_run/`
+- Each run writes a `meta.json` recording the random seed, Python version, platform,
+  full `argv`, working directory, and run parameters, so a run can be reproduced
+  verbatim. Library versions and hardware are not currently captured
+- Figure generation is isolated in `experiments/plotting/` as pure CSV → figure
+  functions
+
+### 6.5 Adaptive-attack suite (`benchmarks/`)
+
+A second evaluation suite covers attacks that survive naive replay/impersonation
+defenses: paraphrased worms, delayed and semantic replay, benign broadcast,
+multi-hop indirect prompt injection, delayed memory poisoning, semantic collusion,
+and harmful semantics under a valid capability. It evaluates **8 workloads × 10
+baselines**, the ten being `cg_atc`, five stronger baselines (`mtls_nonce`,
+`signed_jwt`, `capability_central_audit`, `anomaly_signed_logs`, `opa_rego`) and the
+four legacy baselines from §6.2.
+
+Reported metrics: attack success rate, TPR, FPR, false containment rate, affected
+agents, maximum propagation depth, allowed harmful messages, per-message latency.
+
+```sh
+# one combination
+PYTHONPATH=. python benchmarks/run_adaptive_attacks.py \
+  --workload paraphrased_worm --baseline cg_atc \
+  --num-agents 100 --num-messages 1000 --seed 42 --output <path>.json
+
+# all 80 combinations, then the three paper tables
+bash benchmarks/run_all_adaptive_experiments.sh
+PYTHONPATH=. python -m benchmarks.tables --root <run-dir> --output <run-dir>/tables
+```
+
+Unlike `experiments/`, these scripts do take arguments. The headline result is
+deliberately qualified: CG-ATC prevents impersonation and low-level replay
+cryptographically, policy-blocks unauthorized actions, and bounds propagation — but
+for cryptographically valid, semantically harmful behaviour it claims no semantic
+correctness. See the README for the full statement.
 
 ---
 
-## 7. Operational instructions
+## 7. Working on this code
 
-### 7.1 Always confirm before starting work
+### 7.1 Orienting a change
 
-1. First identify **which paper section, which equation number ((1)-(39)), and which
-   game (1-4)** the task corresponds to.
-2. Confirm that the lower layers that the relevant phase depends on are complete and
-   tested.
-3. If a lower layer is incomplete, do not start on the upper layer; implement the
-   dependency first.
+1. Identify **which paper section and which equation number ((1)-(39))** the change
+   belongs to, and whether a theorem (1-4) depends on it.
+2. Respect the layering in §3.3: a change in an upper layer must not reach around a
+   lower one. `cgatc/crypto/` depends on nothing in the package; `core/` depends only
+   on `crypto/`; and so on upward.
+3. Anything touching `capability/`, `audit/`, `messaging/` or `crypto/` changes the
+   evidence for a theorem — update `tests/security/` in the same change.
 
 ### 7.2 Checklist when adding code
 
 - [ ] Are the paper section and equation number stated in the docstring?
-- [ ] If a game (1-4) or theorem applies, is the relationship documented in the
-      docstring?
-- [ ] Was a corresponding property test or unit test added?
+- [ ] If a theorem (1-4) applies, is the relationship documented in the docstring?
+- [ ] Was a corresponding security-property test or unit test added?
 - [ ] Are cryptographic primitives free of hand-rolled implementations?
 - [ ] Is the design such that secrets cannot leak into `__repr__` / logs?
 - [ ] Is it default-deny (capability/scope verification)?
@@ -627,10 +652,11 @@ Workloads take a deterministic seed to guarantee reproducibility.
 - Creating code paths that skip security verification (e.g. `if debug:
   skip_signature_check`)
 - Weakening the core logic to make tests pass
-- **Omitting the Game 1-4 simulators or the property tests corresponding to
-  Theorems 1-4**
-- Deviating from the game definitions of paper §III-I (challenger initialization
-  procedure, adversary winning conditions)
+- **Removing or narrowing a `tests/security/` test without replacing the evidence it
+  provided for its theorem**
+- Replacing the seeded `random.Random(seed)` calls in `experiments/workloads/` or
+  `benchmarks/workloads/` with `secrets` — they are deterministic on purpose (§6.3),
+  and changing them silently invalidates every committed result
 
 ### 7.4 When something is unclear
 
@@ -662,12 +688,13 @@ From the paper's bibliography, those referenced frequently during implementation
   Signatures", SAC 2020 (threshold-signature candidate for Eq. (17))
 - **VRF (RFC 9381)**: Goldberg et al., "Verifiable Random Functions (VRFs)",
   RFC 9381, 2023 (VRF candidate for Eq. (18))
-- **The paper itself**: `paper/main.tex` — the single source of truth for this
-  implementation. The manuscript source is not distributed in this repository;
-  see `docs/paper_mapping.md` for the section ↔ module mapping.
+- **The paper itself** — the single source of truth for the scheme. The manuscript
+  source is not distributed in this repository; see `docs/paper_mapping.md` for the
+  section ↔ module mapping.
 
 ---
 
-*This file is the single source of truth for the CG-ATC implementation conventions.
-When the paper is revised (changes to section structure, equation numbers, or game
-definitions), update the §2 mapping tables in this file first.*
+*This file describes the implementation as it stands. When the paper is revised
+(section structure, equation numbers, theorem statements), update the §2 mapping
+tables here first, then `docs/paper_mapping.md`, then the affected docstrings.
+Divergences between the paper and the code belong in `docs/open_questions.md`.*
