@@ -1,0 +1,5 @@
+TamperKind,CGATCDetects,CentralAuditDetects
+delete,yes,no
+modify,yes,no
+reorder,yes,no
+insert_fake,yes,no

@@ -1,0 +1,8 @@
+{
+  "python": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+  "platform": "Linux-6.17.0-20-generic-x86_64-with-glibc2.39",
+  "argv": [
+    "experiments/bench_audit_overhead.py"
+  ],
+  "cwd": "/home/sugio/Documents/CyberSecurity/Multi-Agent-CG-ATC/20260426"
+}

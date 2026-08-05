@@ -1,0 +1,11 @@
+Baseline,Message Authentication,Replay Protection,Capability Enforcement,Causal Provenance,Tamper Evident Audit,Risk Adaptive Containment,Threshold Authorization
+cg_atc,yes,yes (nonce + chain + freshness),yes,yes (prevHash + audit graph),yes (per-agent hash chain + Merkle root),yes,yes
+baseline_mtls_nonce,channel only,yes (nonce cache),no,no,no,no,no
+baseline_signed_jwt,yes (per-message JWT),"yes (jti uniqueness, exp)",scope claim only,no,no,no,no
+baseline_capability_central_audit,no,no,yes,no,centralised only (vulnerable to delete/modify/reorder),no,no
+baseline_anomaly_signed_logs,yes (signed log entries),indirect (anomaly detector),no,no,yes (signed log only),detection only (no enforcement),no
+baseline_opa_rego,no,no,policy-based,no,no,yes (risk_score policy rule),no
+auth_only,channel only,no,no,no,no,no,no
+tls_oauth,channel only,no,scope only,no,no,no,no
+cap_no_audit,no,no,yes,no,no,no,no
+anomaly_no_crypto,no,indirect,no,no,no,detection only,no

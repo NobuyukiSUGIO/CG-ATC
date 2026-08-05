@@ -1,0 +1,18 @@
+{
+  "workload": "memory_poisoning_delayed",
+  "baseline": "baseline_opa_rego",
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_success_rate": 0.5,
+  "true_positive_rate": 0.5,
+  "false_positive_rate": 0.0,
+  "false_containment_rate": 0.0,
+  "mean_time_to_detection": 2.0,
+  "mean_time_to_containment": 2.0,
+  "max_propagation_depth": 2,
+  "num_affected_agents": 2,
+  "num_blocked_messages": 250,
+  "num_allowed_harmful_messages": 250,
+  "median_latency_us": 0.8310016710311174,
+  "p95_latency_us": 1.2230011634528637
+}

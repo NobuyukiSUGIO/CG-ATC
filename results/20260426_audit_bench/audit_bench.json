@@ -1,0 +1,38 @@
+[
+  {
+    "log_size": 10,
+    "avg_append_us": 10.454899165779352,
+    "root_construction_ms": 0.028754002414643764,
+    "proof_build_us": 25.879009626805782,
+    "proof_verify_us": 9.09800291992724,
+    "proof_size_bytes": 128,
+    "verify_ok": true
+  },
+  {
+    "log_size": 100,
+    "avg_append_us": 5.0414600991643965,
+    "root_construction_ms": 0.18155400175601244,
+    "proof_build_us": 179.60998229682446,
+    "proof_verify_us": 11.321011697873473,
+    "proof_size_bytes": 224,
+    "verify_ok": true
+  },
+  {
+    "log_size": 1000,
+    "avg_append_us": 4.957501980243251,
+    "root_construction_ms": 1.8842440040316433,
+    "proof_build_us": 1719.110005069524,
+    "proof_verify_us": 14.246994396671653,
+    "proof_size_bytes": 320,
+    "verify_ok": true
+  },
+  {
+    "log_size": 10000,
+    "avg_append_us": 4.797598900040612,
+    "root_construction_ms": 18.025716010015458,
+    "proof_build_us": 17357.79899172485,
+    "proof_verify_us": 21.351006580516696,
+    "proof_size_bytes": 448,
+    "verify_ok": true
+  }
+]

@@ -1,0 +1,162 @@
+[
+  {
+    "workload": "benign",
+    "baseline": "auth_only",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 0.8920032996684313,
+    "n_messages": 200
+  },
+  {
+    "workload": "benign",
+    "baseline": "tls_oauth",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 0.8519855327904224,
+    "n_messages": 200
+  },
+  {
+    "workload": "benign",
+    "baseline": "cap_no_audit",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 127.69100430887192,
+    "n_messages": 200
+  },
+  {
+    "workload": "benign",
+    "baseline": "anomaly_no_crypto",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 2.1939922589808702,
+    "n_messages": 200
+  },
+  {
+    "workload": "benign",
+    "baseline": "cgatc_full",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 311.63600215222687,
+    "n_messages": 200
+  },
+  {
+    "workload": "replay",
+    "baseline": "auth_only",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 0.9219947969540954,
+    "n_messages": 100
+  },
+  {
+    "workload": "replay",
+    "baseline": "tls_oauth",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 0.9014911483973265,
+    "n_messages": 100
+  },
+  {
+    "workload": "replay",
+    "baseline": "cap_no_audit",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 129.84500790480524,
+    "n_messages": 100
+  },
+  {
+    "workload": "replay",
+    "baseline": "anomaly_no_crypto",
+    "tpr": 0.9797979797979798,
+    "fpr": 0.0,
+    "latency_us": 3.0859955586493015,
+    "n_messages": 100
+  },
+  {
+    "workload": "replay",
+    "baseline": "cgatc_full",
+    "tpr": 1.0,
+    "fpr": 0.0,
+    "latency_us": 151.6110060038045,
+    "n_messages": 100
+  },
+  {
+    "workload": "worm",
+    "baseline": "auth_only",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 0.8819915819913149,
+    "n_messages": 200
+  },
+  {
+    "workload": "worm",
+    "baseline": "tls_oauth",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 0.8709903340786695,
+    "n_messages": 200
+  },
+  {
+    "workload": "worm",
+    "baseline": "cap_no_audit",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 129.18350694235414,
+    "n_messages": 200
+  },
+  {
+    "workload": "worm",
+    "baseline": "anomaly_no_crypto",
+    "tpr": 0.97,
+    "fpr": 0.0,
+    "latency_us": 2.113491063937545,
+    "n_messages": 200
+  },
+  {
+    "workload": "worm",
+    "baseline": "cgatc_full",
+    "tpr": 0.99,
+    "fpr": 0.0,
+    "latency_us": 304.1520103579387,
+    "n_messages": 200
+  },
+  {
+    "workload": "collusion",
+    "baseline": "auth_only",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 0.9014911483973265,
+    "n_messages": 100
+  },
+  {
+    "workload": "collusion",
+    "baseline": "tls_oauth",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 0.8619972504675388,
+    "n_messages": 100
+  },
+  {
+    "workload": "collusion",
+    "baseline": "cap_no_audit",
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "latency_us": 131.1624946538359,
+    "n_messages": 100
+  },
+  {
+    "workload": "collusion",
+    "baseline": "anomaly_no_crypto",
+    "tpr": 0.94,
+    "fpr": 0.0,
+    "latency_us": 2.405009581707418,
+    "n_messages": 100
+  },
+  {
+    "workload": "collusion",
+    "baseline": "cgatc_full",
+    "tpr": 0.98,
+    "fpr": 0.0,
+    "latency_us": 298.92749444115907,
+    "n_messages": 100
+  }
+]

@@ -1,0 +1,24 @@
+[
+  {
+    "fanout": 10,
+    "depth": 3,
+    "agents_reached_before": 30,
+    "max_radius_before": 3,
+    "agents_reached_after_isolation": 0,
+    "max_radius_after": 0,
+    "containment_level_after": "CREDENTIALS_REVOKED",
+    "final_risk": 29.556573511756966,
+    "tau_4": 10.0
+  },
+  {
+    "fanout": 50,
+    "depth": 2,
+    "agents_reached_before": 100,
+    "max_radius_before": 3,
+    "agents_reached_after_isolation": 0,
+    "max_radius_after": 0,
+    "containment_level_after": "CREDENTIALS_REVOKED",
+    "final_risk": 29.556573511756966,
+    "tau_4": 10.0
+  }
+]
