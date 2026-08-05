@@ -31,10 +31,10 @@ etc.).
 
 The implementation must always embody this claim in a verifiable form. Do not write
 code that merely "looks like it works"; write code for which the **safety games
-defined by the game-based formalism of paper §II (Games 1-4) hold as the
+defined by the game-based formalism of paper §III-I (Games 1-4) hold as the
 corresponding Theorems 1-4**.
 
-### 1.3 Assumed threat model (paper §I-A, §II)
+### 1.3 Assumed threat model (paper §III-A, §III-I)
 
 - Agent set `A = {A_1, ..., A_n}`; the adversary `E` can compromise at most `f`
   agents (`C ⊆ A, |C| ≤ f`).
@@ -43,7 +43,7 @@ corresponding Theorems 1-4**.
 - However, it cannot break standard cryptographic assumptions (EUF-CMA, AE, hash
   collision resistance, VRF pseudorandomness/verifiability, threshold-signature
   unforgeability); success probability is negligible in the security parameter `λ`.
-- Assumed attack vectors (enumerated in §I-A): impersonation, tampering/replay of
+- Assumed attack vectors (enumerated in §III-A): impersonation, tampering/replay of
   A2A messages, Agent Card forgery, privilege escalation, malicious prompt
   propagation, collusion, shared-memory poisoning, audit-trail tampering, and
   cascading failure via delegated tasks.
@@ -59,26 +59,26 @@ The paper has the structure below, and each subsection maps 1:1 to a module as a
 rule. When writing code, state the corresponding paper section and **equation
 number** explicitly in the docstring.
 
-### 2.1 §I Proposed Scheme — components
+### 2.1 §III Proposed Scheme — components
 
 | Paper section | Equations | Module | Main responsibility |
 |---|---|---|---|
-| §I-A System and Threat Model | (1) | `cgatc/core/types.py` | Agent set, task, session, adversary-model type definitions |
-| §I-B Design Principles (7 principles) | — | project-wide | Reflected in all code as design-time invariants |
-| §I-C Cryptographic Agent Identity & Verifiable Agent Card | (2)-(5) | `cgatc/identity/` | Key pair `(sk_i, pk_i)`, `ID_i`, `Card_i`, signature `σ_i` |
-| §I-D Signed A2A Message Format | (6)-(8) | `cgatc/messaging/envelope.py` | Message `m`, signature `σ`, verification `Verify_{pk_i}(H(m), σ) = 1` |
-| §I-E Capability Token | (9)-(10) | `cgatc/capability/` | `cap_{i,j,t}`, Policy Authority signature `σ_PA` |
-| §I-F Tamper-Evident Audit Log | (11)-(13) | `cgatc/audit/` | `L_i^t`, Merkle root `root_i^t`, signature `Σ_i^t` |
-| §I-G-1 Cryptographic Detection | — | `cgatc/detection/crypto_detector.py` | 10 objective verification-failure conditions |
-| §I-G-2 Behavioral & Semantic Detection | (14) | `cgatc/detection/behavioral_detector.py` | Risk score `R_i^{t+1} = λ R_i^t + α C + β B + γ P + δ D` |
-| §I-H-1 Dynamic Capability Reduction | (15) | `cgatc/containment/scope_reducer.py` | 7-stage graduated containment |
-| §I-H-2 Impact Radius Control | (16) | `cgatc/containment/impact_radius.py` | `Impact(A_i, t)`, maximum propagation radius `r` |
-| §I-H-3 Threshold Signatures for High-Risk Actions | (17)-(18) | `cgatc/containment/threshold_authz.py` | k-of-n threshold signatures, VRF committee selection |
-| §I-I Novelty and Advantages | — | (referenced as design guidance) | Design decisions such as treating the Agent Card as a capability certificate |
+| §III-A System and Threat Model | (1) | `cgatc/core/types.py` | Agent set, task, session, adversary-model type definitions |
+| §III-B Design Principles (7 principles) | — | project-wide | Reflected in all code as design-time invariants |
+| §III-C Cryptographic Agent Identity & Verifiable Agent Card | (2)-(5) | `cgatc/identity/` | Key pair `(sk_i, pk_i)`, `ID_i`, `Card_i`, signature `σ_i` |
+| §III-D Signed A2A Message Format | (6)-(8) | `cgatc/messaging/envelope.py` | Message `m`, signature `σ`, verification `Verify_{pk_i}(H(m), σ) = 1` |
+| §III-E Capability Token | (9)-(10) | `cgatc/capability/` | `cap_{i,j,t}`, Policy Authority signature `σ_PA` |
+| §III-F Tamper-Evident Audit Log | (11)-(13) | `cgatc/audit/` | `L_i^t`, Merkle root `root_i^t`, signature `Σ_i^t` |
+| §III-G-1 Cryptographic Detection | — | `cgatc/detection/crypto_detector.py` | 10 objective verification-failure conditions |
+| §III-G-2 Behavioral & Semantic Detection | (14) | `cgatc/detection/behavioral_detector.py` | Risk score `R_i^{t+1} = λ R_i^t + α C + β B + γ P + δ D` |
+| §III-H-1 Dynamic Capability Reduction | (15) | `cgatc/containment/scope_reducer.py` | 7-stage graduated containment |
+| §III-H-2 Impact Radius Control | (16) | `cgatc/containment/impact_radius.py` | `Impact(A_i, t)`, maximum propagation radius `r` |
+| §III-H-3 Threshold Signatures for High-Risk Actions | (17)-(18) | `cgatc/containment/threshold_authz.py` | k-of-n threshold signatures, VRF committee selection |
+| §III-K Novelty and Advantages | — | (referenced as design guidance) | Design decisions such as treating the Agent Card as a capability certificate |
 
-### 2.2 §II Security Properties — game-based formalization and theorems
+### 2.2 §III-I Security Properties — game-based formalization and theorems
 
-Paper §II defines four security properties via a **game-based formalism** and proves
+Paper §III-I defines four security properties via a **game-based formalism** and proves
 four corresponding theorems. These are implemented 1:1 in `tests/security/` as
 **game simulators + property tests**.
 
@@ -91,23 +91,23 @@ four corresponding theorems. These are implemented 1:1 in `tests/security/` as
 
 Each game is implemented as a **challenger-adversary protocol** (see §5.2).
 
-### 2.3 §III Evaluation — implementation and evaluation
+### 2.3 §III-J / §III-L Implementation and evaluation
 
 | Paper section | Location | Main responsibility |
 |---|---|---|
-| §III-A Implementation in A2A Environments | `cgatc/a2a_integration/` | 6 A2A extension headers, 11-step workflow |
-| §III-B Evaluation Plan | `experiments/` | 6 evaluation axes, 5-baseline comparison |
+| §III-J Implementation in A2A Environments | `cgatc/a2a_integration/` | 6 A2A extension headers, 11-step workflow |
+| §III-L Evaluation Plan | `experiments/` | 6 evaluation axes, 5-baseline comparison |
 
 ### 2.4 §IV Conclusion
 
 The completion criterion for the implementation is that §IV's claim (detectability +
-bounded damage) is demonstrated as the theorems of §II.
+bounded damage) is demonstrated as the theorems of §III-I.
 
 ### 2.5 How to cite equations
 
 ```python
 def compute_agent_id(pk: bytes, model_hash: bytes, policy_hash: bytes, env_hash: bytes) -> bytes:
-    """Compute agent identity per Sugio 2026, §I-C, Eq. (3):
+    """Compute agent identity per Sugio 2026, §III-C, Eq. (3):
 
         ID_i = H(pk_i ‖ modelHash_i ‖ policyHash_i ‖ envHash_i)
 
@@ -124,13 +124,13 @@ def compute_agent_id(pk: bytes, model_hash: bytes, policy_hash: bytes, env_hash:
 
 ```python
 def verify_envelope(m: Envelope, sig: bytes, pk: bytes) -> bool:
-    """Verify A2A message signature per Sugio 2026, §I-D, Eq. (8):
+    """Verify A2A message signature per Sugio 2026, §III-D, Eq. (8):
 
         Verify_{pk_i}(H(m), σ) = 1
 
     This corresponds to the receiver-side check in Game 1 (Exp^{auth}_E(λ)),
     Eq. (24). A return value of False MUST cause the message to be rejected
-    by the enforcement layer (see §I-G-1).
+    by the enforcement layer (see §III-G-1).
     """
 ```
 
@@ -149,24 +149,24 @@ def verify_envelope(m: Envelope, sig: bytes, pk: bytes) -> bool:
 └────────┼─────────────────┼─────────────────┼─────────────────┘
          │                 │                 │
 ┌────────┴─────────────────┴─────────────────┴─────────────────┐
-│                       CG-ATC Layer (§I)                       │
+│                       CG-ATC Layer (§III)                     │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐  │
 │  │   Identity   │ │  Messaging   │ │     Capability       │  │
-│  │   (§I-C)     │ │   (§I-D)     │ │       (§I-E)         │  │
+│  │   (§III-C)   │ │   (§III-D)   │ │       (§III-E)       │  │
 │  └──────────────┘ └──────────────┘ └──────────────────────┘  │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐  │
 │  │    Audit     │ │  Detection   │ │     Containment      │  │
-│  │   (§I-F)     │ │   (§I-G)     │ │       (§I-H)         │  │
+│  │   (§III-F)   │ │   (§III-G)   │ │       (§III-H)       │  │
 │  └──────────────┘ └──────────────┘ └──────────────────────┘  │
 └──────────────────────────────────────────────────────────────┘
          │                 │                 │
 ┌────────┴─────────────────┴─────────────────┴─────────────────┐
-│         A2A Protocol Layer (Google A2A) — §III-A              │
+│         A2A Protocol Layer (Google A2A) — §III-J              │
 │           JSON-RPC over HTTP / Streaming (SSE)                │
 └──────────────────────────────────────────────────────────────┘
 
          ┌─────────────────────────────────────────────┐
-         │  Security Property Verification (§II)        │
+         │  Security Property Verification (§III-I)     │
          │  Game-based simulators + property tests      │
          │  Game 1 / Game 2 / Game 3 / Game 4           │
          └─────────────────────────────────────────────┘
@@ -182,52 +182,52 @@ cg-atc/
 ├── .pre-commit-config.yaml
 ├── docs/
 │   ├── paper_mapping.md              # paper ↔ code mapping (detailed)
-│   ├── threat_model.md               # detailed threat model (§I-A, §II)
+│   ├── threat_model.md               # detailed threat model (§III-A, §III-I)
 │   └── game_specifications.md        # implementation spec for Games 1-4
 ├── paper/
 │   └── main.tex                      # paper source (for reference)
 ├── cgatc/                            # main package
 │   ├── __init__.py
 │   ├── core/
-│   │   ├── types.py                  # AgentID, TaskID, SessionID, etc. (§I-A)
+│   │   ├── types.py                  # AgentID, TaskID, SessionID, etc. (§III-A)
 │   │   ├── exceptions.py             # CG-ATC-specific exceptions
 │   │   └── constants.py
 │   ├── crypto/
 │   │   ├── primitives.py             # thin wrappers for H(), Sign(), Verify(), AE
-│   │   ├── threshold.py              # k-of-n threshold signatures (FROST etc.) (§I-H-3)
-│   │   └── vrf.py                    # verifiable random function (§I-H-3, Eq. (18))
-│   ├── identity/                     # §I-C
+│   │   ├── threshold.py              # k-of-n threshold signatures (FROST etc.) (§III-H-3)
+│   │   └── vrf.py                    # verifiable random function (§III-H-3, Eq. (18))
+│   ├── identity/                     # §III-C
 │   │   ├── agent_card.py             # build/sign/verify Card_i (Eq. (4)-(5))
 │   │   ├── attestation.py            # envHash, EnvAttest
 │   │   └── keystore.py               # key pair (sk_i, pk_i) management (Eq. (2))
-│   ├── messaging/                    # §I-D
+│   ├── messaging/                    # §III-D
 │   │   ├── envelope.py               # signed envelope (Eq. (6)-(8))
 │   │   ├── chain.py                  # prevHash causal-chain verification
 │   │   └── replay_guard.py           # nonce/seq management (timestamp freshness)
-│   ├── capability/                   # §I-E
+│   ├── capability/                   # §III-E
 │   │   ├── token.py                  # cap_{i,j,t} structure (Eq. (9))
 │   │   ├── authority.py              # Policy Authority, σ_PA issuance (Eq. (10))
-│   │   └── enforcer.py               # Allow(i, a, cap) enforcement gate (§II Eq. (32))
-│   ├── audit/                        # §I-F
+│   │   └── enforcer.py               # Allow(i, a, cap) enforcement gate (§III-I Eq. (32))
+│   ├── audit/                        # §III-F
 │   │   ├── hashchain.py              # L_i^t = H(L_i^{t-1} ‖ ...) (Eq. (11))
 │   │   ├── merkle.py                 # root_i^t (Eq. (12)) + inclusion proofs
 │   │   └── committer.py              # Σ_i^t signature and external commitment (Eq. (13))
-│   ├── detection/                    # §I-G
-│   │   ├── crypto_detector.py        # cryptographic detection (§I-G-1: 10 conditions)
-│   │   ├── behavioral_detector.py    # behavioral detection (§I-G-2)
+│   ├── detection/                    # §III-G
+│   │   ├── crypto_detector.py        # cryptographic detection (§III-G-1: 10 conditions)
+│   │   ├── behavioral_detector.py    # behavioral detection (§III-G-2)
 │   │   └── risk_score.py             # R_i^{t+1} computation (Eq. (14))
-│   ├── containment/                  # §I-H
+│   ├── containment/                  # §III-H
 │   │   ├── scope_reducer.py          # dynamic scope reduction (Eq. (15), 7 stages)
 │   │   ├── impact_radius.py          # Impact(A_i, t) computation (Eq. (16))
 │   │   └── threshold_authz.py        # threshold authorization (Eq. (17)), VRF committee (Eq. (18))
-│   ├── a2a_integration/              # §III-A
+│   ├── a2a_integration/              # §III-J
 │   │   ├── headers.py                # A2A-Agent-ID, A2A-Signature, and 4 more headers
 │   │   ├── middleware.py             # extension layer over Google A2A
-│   │   └── workflow.py               # the 11-step workflow of §III-A
+│   │   └── workflow.py               # the 11-step workflow of §III-J
 │   ├── policy/
 │   │   ├── policy_dsl.py             # DSL parser for policy Π
 │   │   └── evaluator.py
-│   └── baselines/                    # for the §III-B baseline comparison
+│   └── baselines/                    # for the §III-L baseline comparison
 │       ├── auth_only.py
 │       ├── tls_oauth.py
 │       ├── cap_no_audit.py
@@ -235,7 +235,7 @@ cg-atc/
 ├── tests/
 │   ├── unit/
 │   ├── integration/
-│   ├── security/                     # game-based property tests for §II Games 1-4
+│   ├── security/                     # game-based property tests for §III-I Games 1-4
 │   │   ├── games/
 │   │   │   ├── challenger.py         # shared challenger infrastructure
 │   │   │   ├── adversary.py          # adversary interface
@@ -247,7 +247,7 @@ cg-atc/
 │   │   ├── test_theorem2_auditability.py
 │   │   ├── test_theorem3_capability_bounded_damage.py
 │   │   └── test_theorem4_threshold_protected_action.py
-│   └── adversarial/                  # concrete scenarios for the 9 attacks of §I-A
+│   └── adversarial/                  # concrete scenarios for the 9 attacks of §III-A
 │       ├── test_impersonation.py
 │       ├── test_replay.py
 │       ├── test_forged_card.py
@@ -257,7 +257,7 @@ cg-atc/
 │       ├── test_memory_poisoning.py
 │       ├── test_audit_tampering.py
 │       └── test_cascading_failure.py
-├── experiments/                      # §III-B evaluation scripts
+├── experiments/                      # §III-L evaluation scripts
 │   ├── bench_crypto_overhead.py
 │   ├── bench_audit_overhead.py
 │   ├── eval_detection_perf.py
@@ -286,39 +286,39 @@ tests.
   infrastructure
 - Unit tests: must include known-answer tests (KATs)
 
-**Phase 1: Identity and Agent Card (§I-C, Eq. (2)-(5))**
+**Phase 1: Identity and Agent Card (§III-C, Eq. (2)-(5))**
 - Key pair generation, `compute_agent_id`, `Card`, `sign_card`, `verify_card`
 - `Expiry` validation, certificate-chain verification stub
 - Property tests: forged Cards are always rejected, legitimate Cards are always
   accepted
 
-**Phase 2: Message envelope (§I-D, Eq. (6)-(8))**
+**Phase 2: Message envelope (§III-D, Eq. (6)-(8))**
 - Signed envelope, `prevHash` chain, `seq` monotonicity, `timestamp` freshness
 - Implement the **Game 1 simulator** in `tests/security/games/game1_auth.py`
 - Property test: **Theorem 1 (message authenticity)** —
   `Pr[Exp^{auth}_E(λ) = 1] ≤ negl(λ)`
 
-**Phase 3: Capability tokens (§I-E, Eq. (9)-(10))**
+**Phase 3: Capability tokens (§III-E, Eq. (9)-(10))**
 - `cap_{i,j,t}` structure, issuance and signing `σ_PA` by the Policy Authority
 - Verification of scope, the 8 constraint kinds, expiry, and audience binding
-- Enforcement layer (`Allow(i, a, cap) = 1`, §II Eq. (32))
+- Enforcement layer (`Allow(i, a, cap) = 1`, §III-I Eq. (32))
 - Implement the **Game 3 simulator** in `tests/security/games/game3_cap.py`
 - Property test: **Theorem 3 (capability-bounded damage)** —
   `Damage(A_i) ⊆ ∪ Scope(cap)`
 
-**Phase 4: Audit log (§I-F, Eq. (11)-(13))**
+**Phase 4: Audit log (§III-F, Eq. (11)-(13))**
 - Hash chain `L_i^t`, Merkle root `root_i^t`, signed commitment `Σ_i^t`
 - Implement the `VerifyLog` function (referenced by Game 2)
 - Implement the **Game 2 simulator** in `tests/security/games/game2_audit.py`
 - Property test: **Theorem 2 (auditability)** — dual protection by tamper detection
   and signature unforgeability
 
-**Phase 5: Detection (§I-G)**
-- Cryptographic detection (10 conditions enumerated in §I-G-1)
-- Behavioral detection (8 examples in §I-G-2) and risk score `R_i^{t+1}` (Eq. (14))
+**Phase 5: Detection (§III-G)**
+- Cryptographic detection (10 conditions enumerated in §III-G-1)
+- Behavioral detection (8 examples in §III-G-2) and risk score `R_i^{t+1}` (Eq. (14))
 - Parameters `λ, α, β, γ, δ` and threshold `τ_1` are externalized into a config file
 
-**Phase 6: Containment (§I-H)**
+**Phase 6: Containment (§III-H)**
 - Dynamic scope reduction (Eq. (15), 7-stage graduated containment)
 - Control of the impact radius `r` and computation of `Impact(A_i, t)` (Eq. (16))
 - Threshold signatures (FROST etc.) and VRF committee selection (Eq. (17)-(18))
@@ -326,14 +326,14 @@ tests.
 - Property test: **Theorem 4 (threshold-protected critical action)** — an adversary
   with `|C_P| < k` cannot authorize
 
-**Phase 7: A2A integration (§III-A)**
+**Phase 7: A2A integration (§III-J)**
 - The 6 A2A extension headers (`A2A-Agent-ID`, `A2A-Signature`,
   `A2A-Capability-Token`, `A2A-Prev-Hash`, `A2A-Log-Root`, `A2A-Risk-Level`)
 - Implement the 11-step workflow in `workflow.py`
 - Middleware integration with Google A2A's JSON-RPC / SSE
 - End-to-end integration tests
 
-**Phase 8: Evaluation (§III-B)**
+**Phase 8: Evaluation (§III-L)**
 - The 6 evaluation axes (detection performance, containment performance,
   cryptographic overhead, audit overhead, robustness, deployability)
 - Comparison against the 5 baselines (`auth_only`, `tls_oauth`, `cap_no_audit`,
@@ -357,11 +357,11 @@ below:
 
 | Purpose | Recommended library | Assumption in the paper |
 |---|---|---|
-| Signatures (Ed25519) | `cryptography` or `PyNaCl` | EUF-CMA (§I-A, Theorem 1) |
+| Signatures (Ed25519) | `cryptography` or `PyNaCl` | EUF-CMA (§III-A, Theorem 1) |
 | Hashing (SHA-256/SHA-3) | `hashlib` (stdlib) | Collision resistance (Theorem 2) |
-| AE (ChaCha20-Poly1305) | `cryptography` | Confidentiality + integrity (§I-A) |
+| AE (ChaCha20-Poly1305) | `cryptography` | Confidentiality + integrity (§III-A) |
 | Threshold signatures | `frost-ed25519` etc. | Unforgeability (Theorem 4) |
-| VRF | RFC 9381-conformant library | Pseudorandomness + verifiability (§I-A) |
+| VRF | RFC 9381-conformant library | Pseudorandomness + verifiability (§III-A) |
 | Merkle tree | `pymerkle` or a thin in-house one | Reduces to collision resistance (Theorem 2) |
 
 **Key management**: during development, use the OS keychain or an encrypted file; for
@@ -369,22 +369,22 @@ production, factor this out behind an interface that assumes KMS / HSM integrati
 
 ### 4.3 Design principles
 
-The 7 principles of paper §I-B translated into coding rules:
+The 7 principles of paper §III-B translated into coding rules:
 
-1. **No implicit trust** (§I-B-1): explicit verification at the entry point of every
+1. **No implicit trust** (§III-B-1): explicit verification at the entry point of every
    public function. Comments such as "we trust the caller" are forbidden.
-2. **Cryptographic identity** (§I-B-2): AgentID is an immutable value object. Do not
+2. **Cryptographic identity** (§III-B-2): AgentID is an immutable value object. Do not
    pass raw `bytes` around.
-3. **Signed & causally linked** (§I-B-3): the message-send API has no "send without
+3. **Signed & causally linked** (§III-B-3): the message-send API has no "send without
    signature" overload. `prevHash` is mandatory.
-4. **Capability least privilege** (§I-B-4): privileged access that does not require a
+4. **Capability least privilege** (§III-B-4): privileged access that does not require a
    capability must not exist. Default deny.
-5. **Tamper-evident** (§I-B-5): every state change is recorded in the audit log. Do
+5. **Tamper-evident** (§III-B-5): every state change is recorded in the audit log. Do
    not create code paths that skip log writes.
-6. **Threshold for high-risk** (§I-B-6): the list of high-risk actions is stated
+6. **Threshold for high-risk** (§III-B-6): the list of high-risk actions is stated
    explicitly in `cgatc/containment/threshold_authz.py`, and the type system
    prevents executing them with a single signature.
-7. **Dynamic containment** (§I-B-7): risk score and scope must be referenceable from
+7. **Dynamic containment** (§III-B-7): risk score and scope must be referenceable from
    separate services; do not hard-code them.
 
 ### 4.4 Naming conventions
@@ -422,13 +422,13 @@ The 7 principles of paper §I-B translated into coding rules:
 |---|---|---|
 | Unit | `tests/unit/` | Behavior of individual functions and classes |
 | Integration | `tests/integration/` | Cross-module interaction (e.g. issue → sign → verify → audit) |
-| **Game-based property** | `tests/security/` | **Verification of Games 1-4 and Theorems 1-4 of paper §II** |
-| Adversarial scenarios | `tests/adversarial/` | Concrete reproduction of the 9 attacks of §I-A and confirmation of defenses |
+| **Game-based property** | `tests/security/` | **Verification of Games 1-4 and Theorems 1-4 of paper §III-I** |
+| Adversarial scenarios | `tests/adversarial/` | Concrete reproduction of the 9 attacks of §III-A and confirmation of defenses |
 | E2E | `tests/e2e/` | Full path over the A2A protocol |
 
-### 5.2 Game-based property tests (most important, corresponds to §II)
+### 5.2 Game-based property tests (most important, corresponds to §III-I)
 
-Paper §II formalizes Games 1-4 as challenger-adversary protocols. Implement these
+Paper §III-I formalizes Games 1-4 as challenger-adversary protocols. Implement these
 faithfully in Python.
 
 #### 5.2.1 Shared challenger-adversary infrastructure
@@ -436,7 +436,7 @@ faithfully in Python.
 ```python
 # tests/security/games/challenger.py
 class Challenger:
-    """Challenger for security games defined in Sugio 2026, §II.
+    """Challenger for security games defined in Sugio 2026, §III-I.
 
     Initializes CG-ATC with security parameter λ, policy Π, and agent set A.
     Provides oracles for the adversary subject to protocol rules.
@@ -452,12 +452,12 @@ class Adversary(ABC):
     def attack(self, challenger: Challenger) -> Any: ...
 ```
 
-#### 5.2.2 Game 1: message authenticity (§II Eq. (21)-(26))
+#### 5.2.2 Game 1: message authenticity (§III-I Eq. (21)-(26))
 
 ```python
 # tests/security/games/game1_auth.py
 def run_game1(challenger: Challenger, adversary: Adversary) -> bool:
-    """Simulate Exp^{auth}_E(λ) per Sugio 2026, §II Game 1.
+    """Simulate Exp^{auth}_E(λ) per Sugio 2026, §III-I Game 1.
 
     Adversary wins iff:
       (a) Verify_{pk_i}(H(m*), σ*) = 1   [Eq. (24)]
@@ -476,7 +476,7 @@ from hypothesis import given, strategies as st, settings
        num_corrupted=st.integers(min_value=0, max_value=5))
 @settings(max_examples=200)
 def test_theorem1_no_ppt_adversary_wins(num_agents, num_corrupted):
-    """Theorem 1 (Sugio 2026, §II): Under EUF-CMA security of the underlying
+    """Theorem 1 (Sugio 2026, §III-I): Under EUF-CMA security of the underlying
     signature scheme, CG-ATC satisfies message authenticity, i.e.,
         Pr[Exp^{auth}_E(λ) = 1] ≤ negl(λ).
 
@@ -493,12 +493,12 @@ def test_theorem1_no_ppt_adversary_wins(num_agents, num_corrupted):
 
 #### 5.2.3 Games 2-4 follow the same challenger-adversary pattern
 
-- **Game 2** (§II Eq. (27)-(31)): implementing the `VerifyLog` function is mandatory.
+- **Game 2** (§III-I Eq. (27)-(31)): implementing the `VerifyLog` function is mandatory.
   Confirm that tampered logs are not accepted.
-- **Game 3** (§II Eq. (32)-(36)): build the assumption that the Policy Authority is
+- **Game 3** (§III-I Eq. (32)-(36)): build the assumption that the Policy Authority is
   uncorrupted into the challenger. Confirm that a corrupted agent cannot execute
   protected actions outside `∪ Scope(cap)`.
-- **Game 4** (§II Eq. (37)-(39)): enforce the adversary constraint `|C_P| < k` on the
+- **Game 4** (§III-I Eq. (37)-(39)): enforce the adversary constraint `|C_P| < k` on the
   challenger side and confirm that no valid threshold signature can be produced.
 
 **Important**: the adversary in each game is a "simulation of the PPT constraint",
@@ -512,9 +512,9 @@ complete.**
 
 ### 5.3 Adversarial scenario tests
 
-Create one test file per attack enumerated in paper §I-A:
+Create one test file per attack enumerated in paper §III-A:
 
-| Attack (§I-A) | Test file | Expected result |
+| Attack (§III-A) | Test file | Expected result |
 |---|---|---|
 | impersonating another agent | `test_impersonation.py` | Game 1 violation detected → rejected |
 | modifying or replaying A2A messages | `test_replay.py` | Rejected by replay_guard |
@@ -547,9 +547,9 @@ VRF: RFC 9381).
 
 ## 6. Experiment and evaluation script layout
 
-Scripts corresponding to the evaluation axes of paper §III-B live in `experiments/`.
+Scripts corresponding to the evaluation axes of paper §III-L live in `experiments/`.
 
-### 6.1 Evaluation axes and scripts (enumerated in §III-B)
+### 6.1 Evaluation axes and scripts (enumerated in §III-L)
 
 | Evaluation axis | Script | Output |
 |---|---|---|
@@ -560,7 +560,7 @@ Scripts corresponding to the evaluation axes of paper §III-B live in `experimen
 | **Robustness** (replay, impersonation, collusion, worm prompts, contagious jailbreaks, memory poisoning) | `eval_robustness.py` (+ `tests/adversarial/`) | Success rate per attack |
 | **Practical deployability** (A2A JSON-RPC, HTTP, streaming compatibility) | `eval_deployability.py` + `examples/` | Integration test report |
 
-### 6.2 Baseline comparison (enumerated in §III-B)
+### 6.2 Baseline comparison (enumerated in §III-L)
 
 Make the 5 baselines switchable via `compare_baselines.py`:
 
@@ -629,7 +629,7 @@ Workloads take a deterministic seed to guarantee reproducibility.
 - Weakening the core logic to make tests pass
 - **Omitting the Game 1-4 simulators or the property tests corresponding to
   Theorems 1-4**
-- Deviating from the game definitions of paper §II (challenger initialization
+- Deviating from the game definitions of paper §III-I (challenger initialization
   procedure, adversary winning conditions)
 
 ### 7.4 When something is unclear
@@ -641,11 +641,11 @@ policy Π), implement a conservative provisional version and record it in
 unilaterally settle on a specification that conflicts with the paper.
 
 The following in particular are not made explicit in the paper:
-- The concrete verification steps of `VerifyLog` (referenced by §II Game 2, but the
-  definition must be inferred from the structure in §I-F)
+- The concrete verification steps of `VerifyLog` (referenced by §III-I Game 2, but the
+  definition must be inferred from the structure in §III-F)
 - Normalization and feature extraction for the behavioral anomaly score `B_i^t`
 - The concrete DSL/format of policy Π
-- The boundary of the "trusted enforcement layer" mentioned in §II (definition of the
+- The boundary of the "trusted enforcement layer" mentioned in §III-I (definition of the
   state-transition semantics)
 
 ---
@@ -657,7 +657,7 @@ From the paper's bibliography, those referenced frequently during implementation
 - **A2A Protocol** [3]: Google, Agent2Agent (A2A) Protocol,
   https://a2a-protocol.org/latest/
 - **EUF-CMA**: see a standard cryptography textbook (premise of the threat model in
-  §I-A)
+  §III-A)
 - **FROST**: Komlo, Goldberg, "FROST: Flexible Round-Optimized Schnorr Threshold
   Signatures", SAC 2020 (threshold-signature candidate for Eq. (17))
 - **VRF (RFC 9381)**: Goldberg et al., "Verifiable Random Functions (VRFs)",

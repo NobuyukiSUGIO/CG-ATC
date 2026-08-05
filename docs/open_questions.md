@@ -50,3 +50,29 @@ seed with Ed25519 and the receiver derives a deterministic shuffle from
 `H(σ)`.  This is *not* a full RFC 9381 VRF and we mark it as such; the
 public output is unforgeable but lacks the formal "VRF proof" structure.
 Replacing it with a real RFC 9381 VRF is tracked separately.
+
+## Q5. Section numbers for "Novelty and Advantages" and the Conclusion
+
+**Context.** `CLAUDE.md` originally used an older numbering in which the
+proposed scheme was §I, the security properties §II, and the evaluation
+§III.  The paper now places the whole scheme in §III (§III-A ... §III-L),
+which is the numbering already used by the code, `README.md`, and
+`docs/paper_mapping.md`.  `CLAUDE.md` has been renumbered to match.
+
+**Confirmed mappings** (from `docs/paper_mapping.md` and the docstrings in
+`tests/security/`): §I-A..§I-H → §III-A..§III-H, §II → §III-I,
+old §III-A → §III-J, old §III-B → §III-L.
+
+**Unresolved.**
+
+1. *Novelty and Advantages* (old §I-I) was renumbered to **§III-K** by
+   inference only: §III-K is the sole gap between §III-J (Implementation)
+   and §III-L (Evaluation Plan), and `docs/paper_mapping.md` omits it.
+   No code or doc references §III-K, so this is unverified.
+2. The *Conclusion* is still written as **§IV** and was left untouched.
+   If the paper's top-level structure is §I Introduction / §II Related
+   work / §III Proposed scheme / §IV Conclusion, this is already correct;
+   if a section was inserted, it may need to become §V.
+
+Both should be checked against the manuscript before submission.  Neither
+affects code behaviour — they appear only in `CLAUDE.md` prose.
