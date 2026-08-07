@@ -1,0 +1,18 @@
+{
+  "workload": "paraphrased_worm",
+  "baseline": "cg_atc",
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_success_rate": 0.02857142857142857,
+  "true_positive_rate": 0.9714285714285714,
+  "false_positive_rate": 0.0,
+  "false_containment_rate": 0.0,
+  "mean_time_to_detection": 0.0,
+  "mean_time_to_containment": 0.0,
+  "max_propagation_depth": 1,
+  "num_affected_agents": 17,
+  "num_blocked_messages": 680,
+  "num_allowed_harmful_messages": 20,
+  "median_latency_us": 281.3934697769582,
+  "p95_latency_us": 295.20492535084486
+}

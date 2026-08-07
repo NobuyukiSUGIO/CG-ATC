@@ -1,0 +1,18 @@
+{
+  "workload": "delayed_replay",
+  "baseline": "baseline_mtls_nonce",
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_success_rate": 0.3333333333333333,
+  "true_positive_rate": 0.6666666666666666,
+  "false_positive_rate": 0.0,
+  "false_containment_rate": 0.0,
+  "mean_time_to_detection": 0.0,
+  "mean_time_to_containment": 0.0,
+  "max_propagation_depth": 0,
+  "num_affected_agents": 2,
+  "num_blocked_messages": 4,
+  "num_allowed_harmful_messages": 2,
+  "median_latency_us": 3.516965080052614,
+  "p95_latency_us": 4.337984137237072
+}

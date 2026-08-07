@@ -1,0 +1,53 @@
+{
+  "latency": [
+    {
+      "op": "sha256_256B",
+      "n": 5000,
+      "mean_us": 0.6780235562473536,
+      "median_us": 0.6520422175526619,
+      "p95_us": 0.6810296326875687,
+      "throughput_per_s": 1474875.0110315997
+    },
+    {
+      "op": "ed25519_sign_256B",
+      "n": 5000,
+      "mean_us": 48.18360521458089,
+      "median_us": 48.01992326974869,
+      "p95_us": 50.37500523030758,
+      "throughput_per_s": 20753.947230527883
+    },
+    {
+      "op": "ed25519_verify_256B",
+      "n": 5000,
+      "mean_us": 80.15498251188546,
+      "median_us": 79.88105062395334,
+      "p95_us": 82.40609895437956,
+      "throughput_per_s": 12475.830805049693
+    },
+    {
+      "op": "envelope_build_sign_verify",
+      "n": 2000,
+      "mean_us": 162.01363631989807,
+      "median_us": 161.04301903396845,
+      "p95_us": 167.1239733695984,
+      "throughput_per_s": 6172.319952287761
+    },
+    {
+      "op": "capability_issue_verify",
+      "n": 2000,
+      "mean_us": 168.04391000187024,
+      "median_us": 166.92449571564794,
+      "p95_us": 173.39608166366816,
+      "throughput_per_s": 5950.825590697517
+    }
+  ],
+  "sizes_bytes": {
+    "payload_bytes": 256,
+    "envelope_canonical_bytes": 513,
+    "signed_envelope_json_bytes": 673,
+    "capability_canonical_bytes": 627,
+    "signed_capability_json_bytes": 876,
+    "metadata_dict_json_bytes": 2006,
+    "overhead_bytes": 1750
+  }
+}

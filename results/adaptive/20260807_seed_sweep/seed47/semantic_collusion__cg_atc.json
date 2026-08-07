@@ -1,0 +1,18 @@
+{
+  "workload": "semantic_collusion",
+  "baseline": "cg_atc",
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_success_rate": 0.004,
+  "true_positive_rate": 0.996,
+  "false_positive_rate": 0.0,
+  "false_containment_rate": 0.0,
+  "mean_time_to_detection": 2.0,
+  "mean_time_to_containment": 2.0,
+  "max_propagation_depth": 0,
+  "num_affected_agents": 3,
+  "num_blocked_messages": 498,
+  "num_allowed_harmful_messages": 2,
+  "median_latency_us": 278.04693672806025,
+  "p95_latency_us": 292.8399480879307
+}

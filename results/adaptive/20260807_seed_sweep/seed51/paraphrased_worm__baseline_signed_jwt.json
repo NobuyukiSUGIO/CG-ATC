@@ -1,0 +1,18 @@
+{
+  "workload": "paraphrased_worm",
+  "baseline": "baseline_signed_jwt",
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_success_rate": 1.0,
+  "true_positive_rate": 0.0,
+  "false_positive_rate": 0.0,
+  "false_containment_rate": 0.0,
+  "mean_time_to_detection": null,
+  "mean_time_to_containment": null,
+  "max_propagation_depth": 1,
+  "num_affected_agents": 50,
+  "num_blocked_messages": 0,
+  "num_allowed_harmful_messages": 700,
+  "median_latency_us": 93.24500570073724,
+  "p95_latency_us": 99.70692917704582
+}

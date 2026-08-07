@@ -1,0 +1,18 @@
+{
+  "workload": "memory_poisoning_delayed",
+  "baseline": "tls_oauth",
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_success_rate": 1.0,
+  "true_positive_rate": 0.0,
+  "false_positive_rate": 0.0,
+  "false_containment_rate": 0.0,
+  "mean_time_to_detection": null,
+  "mean_time_to_containment": null,
+  "max_propagation_depth": 2,
+  "num_affected_agents": 3,
+  "num_blocked_messages": 0,
+  "num_allowed_harmful_messages": 500,
+  "median_latency_us": 3.1959498301148415,
+  "p95_latency_us": 3.7569552659988403
+}

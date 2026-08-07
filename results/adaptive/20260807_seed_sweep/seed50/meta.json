@@ -1,0 +1,28 @@
+{
+  "workload": "valid_capability_harmful_semantics",
+  "baseline": "anomaly_no_crypto",
+  "seed": 50,
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_ratio": 0.7,
+  "policy": "default",
+  "timestamp": "2026-08-07T00:43:34.355049+00:00",
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+  "argv": [
+    "/home/sugio/Documents/CyberSecurity/Multi-Agent-CG-ATC/programs/benchmarks/run_adaptive_attacks.py",
+    "--workload",
+    "valid_capability_harmful_semantics",
+    "--baseline",
+    "anomaly_no_crypto",
+    "--num-agents",
+    "100",
+    "--num-messages",
+    "1000",
+    "--seed",
+    "50",
+    "--output",
+    "results/adaptive/20260807_seed_sweep/seed50/valid_capability_harmful_semantics__anomaly_no_crypto.json"
+  ],
+  "cwd": "/home/sugio/Documents/CyberSecurity/Multi-Agent-CG-ATC/programs"
+}

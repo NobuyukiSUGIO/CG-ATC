@@ -1,0 +1,18 @@
+[
+  {
+    "scenario": "replay",
+    "n_messages": 200,
+    "tpr": 1.0,
+    "fpr": 0.0,
+    "median_latency_us": 121.32851406931877,
+    "p95_latency_us": 132.0790033787489
+  },
+  {
+    "scenario": "impersonation",
+    "n_messages": 200,
+    "tpr": 1.0,
+    "fpr": 0.0,
+    "median_latency_us": 199.62602527812123,
+    "p95_latency_us": 274.60698038339615
+  }
+]

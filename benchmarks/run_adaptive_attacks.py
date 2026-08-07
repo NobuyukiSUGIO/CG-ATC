@@ -43,6 +43,9 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="Path to write the metrics JSON to.")
     p.add_argument("--replay-delay-sec", type=int, default=60,
                    help="Replay delay window for delayed_replay workload.")
+    p.add_argument("--broadcast-unauthorized", action="store_true",
+                   help="Run benign_broadcast in its unauthorised variant "
+                        "(coordinator lacks the 'broadcast' scope).")
     p.add_argument("--save-events", action="store_true",
                    help="Also write per-message events to <output>.events.json.")
     return p
@@ -55,6 +58,8 @@ def main(argv: list[str] | None = None) -> int:
     wl_kwargs: dict[str, object] = {}
     if args.workload == "delayed_replay":
         wl_kwargs["replay_delay_sec"] = args.replay_delay_sec
+    if args.workload == "benign_broadcast" and args.broadcast_unauthorized:
+        wl_kwargs["authorized"] = False
     workload = make_workload(args.workload, **wl_kwargs)
 
     # Workload generates its own crew; we rebuild a fresh Crew with the same

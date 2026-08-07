@@ -1,0 +1,18 @@
+{
+  "workload": "valid_capability_harmful_semantics",
+  "baseline": "auth_only",
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_success_rate": 1.0,
+  "true_positive_rate": 0.0,
+  "false_positive_rate": 0.0,
+  "false_containment_rate": 0.0,
+  "mean_time_to_detection": null,
+  "mean_time_to_containment": null,
+  "max_propagation_depth": 0,
+  "num_affected_agents": 2,
+  "num_blocked_messages": 0,
+  "num_allowed_harmful_messages": 700,
+  "median_latency_us": 2.4850014597177505,
+  "p95_latency_us": 2.9960647225379944
+}

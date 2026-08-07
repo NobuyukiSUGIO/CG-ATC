@@ -1,0 +1,30 @@
+{
+  "workload": "benign_broadcast",
+  "baseline": "cg_atc",
+  "seed": 42,
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_ratio": 1.0,
+  "policy": "default",
+  "timestamp": "2026-08-07T00:46:10.165909+00:00",
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+  "argv": [
+    "benchmarks/run_adaptive_attacks.py",
+    "--workload",
+    "benign_broadcast",
+    "--baseline",
+    "cg_atc",
+    "--num-agents",
+    "100",
+    "--num-messages",
+    "1000",
+    "--seed",
+    "42",
+    "--broadcast-unauthorized",
+    "--save-events",
+    "--output",
+    "results/adaptive/20260807_seed_sweep/seed42_events/benign_broadcast_unauth__cg_atc.json"
+  ],
+  "cwd": "/home/sugio/Documents/CyberSecurity/Multi-Agent-CG-ATC/programs"
+}

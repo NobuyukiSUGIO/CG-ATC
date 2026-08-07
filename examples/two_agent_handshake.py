@@ -1,4 +1,4 @@
-"""Demonstrate the §III-J 11-step workflow between two agents.
+"""Demonstrate the §V-A 11-step workflow between two agents.
 
 Run with:
     PYTHONPATH=. python examples/two_agent_handshake.py
@@ -51,7 +51,7 @@ def make_signed_card(name: str, scopes: list[str]):  # type: ignore[no-untyped-d
 
 def main() -> None:
     print("=" * 64)
-    print("CG-ATC two-agent handshake demo (paper §III-J)")
+    print("CG-ATC two-agent handshake demo (paper §V-A)")
     print("=" * 64)
 
     pa = PolicyAuthority(issuer_id="PA")
@@ -84,7 +84,7 @@ def main() -> None:
         audit_sink=InMemoryCommitterSink(),
     )
 
-    # Steps 1-6 of paper §III-J: Bob ingests Alice's card and issues a cap.
+    # Steps 1-6 of paper §V-A: Bob ingests Alice's card and issues a cap.
     task = TaskID.random()
     hs = bob_wf.handshake(
         peer_card=signed_card_alice, task=task,

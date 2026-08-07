@@ -165,7 +165,7 @@ async def main() -> None:
     print(f"  alice_id = {alice_card.card.agent_id.hex()[:24]}…")
     print(f"  bob_id   = {bob_card.card.agent_id.hex()[:24]}…")
 
-    # 3) Both sides handshake (paper §III-J steps 1-6).
+    # 3) Both sides handshake (paper §V-A steps 1-6).
     task = TaskID.random()
     bob_hs = bob_wf.handshake(
         peer_card=alice_card, task=task,
@@ -235,7 +235,7 @@ async def main() -> None:
     print(f"[Alice ← verify] accepted ✓  risk={verdict_back.risk:.2f}  "
           f"containment={verdict_back.containment.name}")
 
-    # 8) Both sides commit their audit roots (paper §III-J step 11).
+    # 8) Both sides commit their audit roots (paper §V-A step 11).
     cb = bob_wf.commit_audit()
     ca = alice_wf.commit_audit()
     print(f"\n[ audit ] Bob   root={cb.root.hex()[:16]}…  events={cb.seq_count}")

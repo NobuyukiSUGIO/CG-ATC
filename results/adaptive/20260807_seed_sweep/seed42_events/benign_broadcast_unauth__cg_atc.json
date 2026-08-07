@@ -1,0 +1,18 @@
+{
+  "workload": "benign_broadcast",
+  "baseline": "cg_atc",
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_success_rate": 0.005,
+  "true_positive_rate": 0.995,
+  "false_positive_rate": 0.0,
+  "false_containment_rate": 0.0,
+  "mean_time_to_detection": 5.0,
+  "mean_time_to_containment": 5.0,
+  "max_propagation_depth": 0,
+  "num_affected_agents": 6,
+  "num_blocked_messages": 995,
+  "num_allowed_harmful_messages": 5,
+  "median_latency_us": 279.6159824356437,
+  "p95_latency_us": 436.2200852483511
+}

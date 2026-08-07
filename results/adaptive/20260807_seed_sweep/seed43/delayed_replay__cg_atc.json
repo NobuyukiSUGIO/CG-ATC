@@ -1,0 +1,18 @@
+{
+  "workload": "delayed_replay",
+  "baseline": "cg_atc",
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_success_rate": 0.0,
+  "true_positive_rate": 1.0,
+  "false_positive_rate": 0.0,
+  "false_containment_rate": 0.0,
+  "mean_time_to_detection": 0.0,
+  "mean_time_to_containment": 0.0,
+  "max_propagation_depth": 0,
+  "num_affected_agents": 0,
+  "num_blocked_messages": 6,
+  "num_allowed_harmful_messages": 0,
+  "median_latency_us": 280.8374701999128,
+  "p95_latency_us": 297.949998639524
+}

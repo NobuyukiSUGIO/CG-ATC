@@ -1,0 +1,18 @@
+{
+  "workload": "semantic_replay",
+  "baseline": "anomaly_no_crypto",
+  "num_agents": 100,
+  "num_messages": 1000,
+  "attack_success_rate": 0.024,
+  "true_positive_rate": 0.976,
+  "false_positive_rate": 0.0,
+  "false_containment_rate": 0.0,
+  "mean_time_to_detection": 12.0,
+  "mean_time_to_containment": 12.0,
+  "max_propagation_depth": 0,
+  "num_affected_agents": 2,
+  "num_blocked_messages": 488,
+  "num_allowed_harmful_messages": 12,
+  "median_latency_us": 1.7585116438567638,
+  "p95_latency_us": 2.1440209820866585
+}
