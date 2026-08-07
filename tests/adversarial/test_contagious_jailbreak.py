@@ -1,4 +1,4 @@
-"""Adversarial test: contagious jailbreak (paper §III-A, §III-G-2).
+"""Adversarial test: contagious jailbreak (paper §III-A, §III-G).
 
 A "contagious jailbreak" is the adversarial-input chain studied by
 Gu et al. (2024): an adversarial image / prompt is processed by agent

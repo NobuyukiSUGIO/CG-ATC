@@ -1,4 +1,4 @@
-"""Theorem 1 — Message Authenticity (paper §III-D-1).
+"""Theorem 1 — Message Authenticity (paper §III-D, §IV-A).
 
 Statement (paraphrased): if the digital signature scheme is EUF-CMA
 secure, then no probabilistic polynomial-time adversary can forge a

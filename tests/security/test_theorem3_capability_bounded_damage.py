@@ -1,4 +1,4 @@
-"""Theorem 3 — Capability-Bounded Damage (paper §III-E, §III-I).
+"""Theorem 3 — Capability-Bounded Containment (paper §III-E, §IV-C).
 
 Statement (paraphrased): if capability tokens are unforgeable and every
 protected resource enforces capability verification, then the direct

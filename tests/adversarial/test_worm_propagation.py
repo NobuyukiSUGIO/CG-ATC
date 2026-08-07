@@ -1,4 +1,4 @@
-"""Adversarial test: worm-style prompt propagation (paper §III-H-2).
+"""Adversarial test: worm-style prompt propagation (paper §III-H).
 
 A compromised agent attempts to propagate a malicious prompt to many
 peers.  CG-ATC's `impact_radius` confines the spread.

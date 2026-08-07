@@ -1,4 +1,4 @@
-"""Detection performance evaluation (paper §III-L: detection metrics).
+"""Detection performance evaluation (paper §V: detection metrics).
 
 Measures TPR / FPR / detection-latency for the CG-ATC stack against
 the worm and replay workloads.

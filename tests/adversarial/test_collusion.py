@@ -1,4 +1,4 @@
-"""Adversarial test: secret collusion among agents (paper §III-G-2).
+"""Adversarial test: secret collusion among agents (paper §III-G).
 
 Two compromised agents (Mallory and Eve) collude:
 
@@ -11,7 +11,7 @@ Two compromised agents (Mallory and Eve) collude:
 
 Cryptographic-only checks (Theorem 1, 3) cannot stop authenticated
 collusion; this test exercises the layered defence — behavioural
-detection + risk score + scope reduction (paper §III-H-1).
+detection + risk score + scope reduction (paper §III-H).
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""End-to-end workflow (paper §III-J).
+"""End-to-end workflow (paper §V-A).
 
 Realises the eleven-step communication workflow listed in the paper:
 
@@ -54,7 +54,7 @@ class HandshakeResult:
 
 
 class Workflow:
-    """Orchestrate the eleven steps of paper §III-J."""
+    """Orchestrate the eleven steps of paper §V-A."""
 
     def __init__(
         self,
@@ -88,7 +88,7 @@ class Workflow:
         and mint a short-lived capability for the peer.
 
         If `peer_x25519_pubkey` is supplied, the session key is derived
-        via X25519 + HKDF-SHA-256 (paper §III-J step 5).  Otherwise we
+        via X25519 + HKDF-SHA-256 (paper §V-A step 5).  Otherwise we
         fall back to a freshly generated random key for back-compat with
         examples that do not exchange ephemeral DH keys.
         """

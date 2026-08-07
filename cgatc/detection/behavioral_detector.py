@@ -1,4 +1,4 @@
-"""Behavioural and semantic detection (paper §III-G-2).
+"""Behavioural and semantic detection (paper §III-G).
 
 Implements the eight enumerated anomaly types as small per-agent rolling
 counters.  The detector only reasons over **authenticated** evidence
@@ -21,7 +21,7 @@ from ..core.types import AgentID, Timestamp, now
 
 
 class BehavioralAnomalyKind(str, Enum):
-    """The 8 anomaly examples enumerated in paper §III-G-2."""
+    """The 8 anomaly examples enumerated in paper §III-G."""
 
     DELEGATION_SPIKE = "delegation_spike"
     AGENT_CARD_CHURN = "agent_card_churn"

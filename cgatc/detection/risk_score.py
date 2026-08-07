@@ -1,4 +1,4 @@
-"""Dynamic risk score (paper §III-G-2).
+"""Dynamic risk score (paper §III-G).
 
     R_i^{t+1} = λ R_i^t + α C_i^t + β B_i^t + γ P_i^t + δ D_i^t
 

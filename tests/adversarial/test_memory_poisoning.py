@@ -1,4 +1,4 @@
-"""Adversarial test: memory poisoning (paper §III-A, §III-G-2).
+"""Adversarial test: memory poisoning (paper §III-A, §III-G).
 
 Memory poisoning injects malicious entries into a long-term store
 (vector DB, RAG corpus, conversation memory) so that future inferences

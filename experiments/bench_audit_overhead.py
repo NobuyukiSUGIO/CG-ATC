@@ -1,4 +1,4 @@
-"""Audit overhead benchmark (paper §III-L).
+"""Audit overhead benchmark (paper §V).
 
 Measures:
     * append latency to the per-agent hash chain

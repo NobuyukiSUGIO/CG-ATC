@@ -1,4 +1,4 @@
-"""k-of-n threshold authorisation (paper §III-H-3).
+"""k-of-n threshold authorisation (paper §III-H).
 
 The paper allows any unforgeable threshold scheme (FROST, BLS, …).  For
 the reference implementation we ship a *threshold multi-signature*

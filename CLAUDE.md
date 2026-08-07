@@ -34,7 +34,7 @@ paper assumes (threshold signatures and the VRF; see §4.2 and
 KMS/HSM-backed. Treat it as an artifact that reproduces the paper's evaluation,
 not as deployable infrastructure.
 
-### 1.2 Central claim (paper §IV)
+### 1.2 Central claim (paper §VII)
 
 > CG-ATC does not claim to always prevent malicious agents. Rather, under standard
 > cryptographic assumptions it guarantees that impersonation, message tampering,
@@ -42,12 +42,12 @@ not as deployable infrastructure.
 > damage caused by a compromised agent is **bounded by the scope of the issued
 > capabilities and by the impact radius**.
 
-The implementation must always embody this claim in a verifiable form. Do not write
-code that merely "looks like it works"; write code for which the **safety games
-defined by the game-based formalism of paper §III-I (Games 1-4) hold as the
-corresponding Theorems 1-4**.
+This claim is what the code is built to make checkable. Paper §IV states it as four
+theorems under explicit cryptographic and enforcement assumptions; `tests/security/`
+exercises the corresponding properties (see §5.2 for the exact scope of what those
+tests establish).
 
-### 1.3 Assumed threat model (paper §III-A, §III-I)
+### 1.3 Assumed threat model (paper §III-A, §IV)
 
 - Agent set `A = {A_1, ..., A_n}`; the adversary `E` can compromise at most `f`
   agents (`C ⊆ A, |C| ≤ f`).
@@ -82,16 +82,16 @@ number** explicitly in the docstring.
 | §III-D Signed A2A Message Format | (6)-(8) | `cgatc/messaging/envelope.py` | Message `m`, signature `σ`, verification `Verify_{pk_i}(H(m), σ) = 1` |
 | §III-E Capability Token | (9)-(10) | `cgatc/capability/` | `cap_{i,j,t}`, Policy Authority signature `σ_PA` |
 | §III-F Tamper-Evident Audit Log | (11)-(13) | `cgatc/audit/` | `L_i^t`, Merkle root `root_i^t`, signature `Σ_i^t` |
-| §III-G-1 Cryptographic Detection | — | `cgatc/detection/crypto_detector.py` | 10 objective verification-failure conditions |
-| §III-G-2 Behavioral & Semantic Detection | (14) | `cgatc/detection/behavioral_detector.py` | Risk score `R_i^{t+1} = λ R_i^t + α C + β B + γ P + δ D` |
-| §III-H-1 Dynamic Capability Reduction | (15) | `cgatc/containment/scope_reducer.py` | 7-stage graduated containment |
-| §III-H-2 Impact Radius Control | (16) | `cgatc/containment/impact_radius.py` | `Impact(A_i, t)`, maximum propagation radius `r` |
-| §III-H-3 Threshold Signatures for High-Risk Actions | (17)-(18) | `cgatc/containment/threshold_authz.py` | k-of-n threshold signatures, VRF committee selection |
-| §III-K Novelty and Advantages | — | (referenced as design guidance) | Design decisions such as treating the Agent Card as a capability certificate |
+| §III-G Cryptographic Detection | — | `cgatc/detection/crypto_detector.py` | 10 objective verification-failure conditions |
+| §III-G Behavioral & Semantic Detection | (14) | `cgatc/detection/behavioral_detector.py` | Risk score `R_i^{t+1} = λ R_i^t + α C + β B + γ P + δ D` |
+| §III-H Dynamic Capability Reduction | (15) | `cgatc/containment/scope_reducer.py` | 7-stage graduated containment |
+| §III-H Impact Radius Control | (16) | `cgatc/containment/impact_radius.py` | `Impact(A_i, t)`, maximum propagation radius `r` |
+| §III-H Threshold Signatures for High-Risk Actions | (17)-(18) | `cgatc/containment/threshold_authz.py` | k-of-n threshold signatures, VRF committee selection |
+| §III-I Novelty and Advantages | — | (referenced as design guidance) | Design decisions such as treating the Agent Card as a capability certificate |
 
-### 2.2 §III-I Security Properties — game-based formalization and theorems
+### 2.2 §IV Security Properties — game-based formalization and theorems
 
-Paper §III-I defines four security properties via a **game-based formalism** and proves
+Paper §IV defines four security properties via a **game-based formalism** and proves
 four corresponding theorems. `tests/security/` has one file per theorem. The tests
 exercise the theorems' properties directly rather than simulating the games —
 see §5.2 for exactly what that does and does not establish.
@@ -103,19 +103,23 @@ see §5.2 for exactly what that does and does not establish.
 | Definition 3 / Theorem 3 / **Game 3: `Exp^{cap}_E(λ)`** | (32)-(36) | `tests/security/test_theorem3_capability_bounded_damage.py` | With unforgeable capabilities and enforced verification at every protected resource, `Damage(A_i) ⊆ ∪ Scope(cap)` |
 | Definition 4 / Theorem 4 / **Game 4: `Exp^{thr}_E(λ)`** | (37)-(39) | `tests/security/test_theorem4_threshold_protected_actions.py` | Under threshold-signature unforgeability, an adversary with `|C_P| < k` cannot authorize high-risk actions |
 
-Each game is implemented as a **challenger-adversary protocol** (see §5.2).
+The four theorems live in §IV-A through §IV-D; §IV-E relates them to one another.
 
-### 2.3 §III-J / §III-L Implementation and evaluation
+### 2.3 §V Evaluation
 
 | Paper section | Location | Main responsibility |
 |---|---|---|
-| §III-J Implementation in A2A Environments | `cgatc/a2a_integration/` | 6 A2A extension headers, 11-step workflow |
-| §III-L Evaluation Plan | `experiments/` | 6 evaluation axes, 5-baseline comparison |
+| §V-A Implementation and Methodology | `cgatc/a2a_integration/` | 6 A2A extension headers, 11-step workflow, ASGI middleware |
+| §V-B Cryptographic and Audit Overhead | `experiments/bench_*.py` | signing/verification latency, Merkle proof cost |
+| §V-C Adaptive Attacks and Baselines | `benchmarks/` | 8 workloads × 10 baselines (see §6.5) |
+| §V-D Layer Responsibility, Scalability, LLM Integration | `experiments/scale_eval.py`, `examples/` | 10/100/1000 agents, end-to-end LLM path |
 
-### 2.4 §IV Conclusion
+### 2.4 §VI Discussion, §VII Conclusion
 
-The completion criterion for the implementation is that §IV's claim (detectability +
-bounded damage) is demonstrated as the theorems of §III-I.
+§VI-B (Forensic Accountability and Semantic Boundary) is the section the
+`benchmarks/` results feed most directly: it is where the paper draws the line
+between what cryptographic evidence settles and what it cannot. §VII restates the
+central claim of §1.2 above.
 
 ### 2.5 How to cite equations
 
@@ -144,26 +148,26 @@ def verify_envelope(m: Envelope, sig: bytes, pk: bytes) -> bool:
 
     This corresponds to the receiver-side check in Game 1 (Exp^{auth}_E(λ)),
     Eq. (24). A return value of False MUST cause the message to be rejected
-    by the enforcement layer (see §III-G-1).
+    by the enforcement layer (see §III-G).
     """
 ```
 
 ---
 
-## 3. Architecture and implementation phases
+## 3. Architecture and layering
 
 ### 3.1 Overall architecture
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                    Application Layer (Agents)                 │
+│                    Application Layer (Agents)                │
 │  ┌────────────┐    ┌────────────┐    ┌────────────┐          │
 │  │  Agent A   │    │  Agent B   │    │  Agent C   │  ...     │
 │  └─────┬──────┘    └─────┬──────┘    └─────┬──────┘          │
 └────────┼─────────────────┼─────────────────┼─────────────────┘
          │                 │                 │
 ┌────────┴─────────────────┴─────────────────┴─────────────────┐
-│                       CG-ATC Layer (§III)                     │
+│                       CG-ATC Layer (§III)                    │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐  │
 │  │   Identity   │ │  Messaging   │ │     Capability       │  │
 │  │   (§III-C)   │ │   (§III-D)   │ │       (§III-E)       │  │
@@ -175,14 +179,14 @@ def verify_envelope(m: Envelope, sig: bytes, pk: bytes) -> bool:
 └──────────────────────────────────────────────────────────────┘
          │                 │                 │
 ┌────────┴─────────────────┴─────────────────┴─────────────────┐
-│         A2A Protocol Layer (Google A2A) — §III-J              │
-│           JSON-RPC over HTTP / Streaming (SSE)                │
+│         A2A Protocol Layer (Google A2A) — §V-A               │
+│           JSON-RPC over HTTP / Streaming (SSE)               │
 └──────────────────────────────────────────────────────────────┘
 
          ┌─────────────────────────────────────────────┐
-         │  Security Property Verification (§III-I)     │
-         │  Game-based simulators + property tests      │
-         │  Game 1 / Game 2 / Game 3 / Game 4           │
+         │  Security Property Verification (§IV)       │
+         │  Direct property tests — see §5.2           │
+         │  Theorem 1 / 2 / 3 / 4                      │
          └─────────────────────────────────────────────┘
 ```
 
@@ -198,8 +202,8 @@ CG-ATC/
 ├── pyproject.toml                    # setuptools; deps + ruff/mypy/pytest config
 ├── .pre-commit-config.yaml
 ├── docs/
-│   ├── paper_mapping.md              # paper ↔ code mapping (§III-A ... §III-L)
-│   ├── threat_model.md               # detailed threat model (§III-A, §III-I)
+│   ├── paper_mapping.md              # paper ↔ code mapping (§III-A ... §V)
+│   ├── threat_model.md               # detailed threat model (§III-A, §IV)
 │   ├── open_questions.md             # interpretation gaps vs. the paper
 │   └── spec_additional_experiments_and_baselines.pdf   # adaptive-attack spec (Japanese)
 ├── cgatc/                            # main package
@@ -210,8 +214,8 @@ CG-ATC/
 │   ├── crypto/
 │   │   ├── primitives.py             # thin wrappers for H(), Sign(), Verify(), AE
 │   │   ├── kex.py                    # X25519 session-key agreement
-│   │   ├── threshold.py              # k-of-n threshold authorization (§III-H-3)
-│   │   └── vrf.py                    # verifiable-random-function stand-in (§III-H-3, Eq. (18))
+│   │   ├── threshold.py              # k-of-n threshold authorization (§III-H)
+│   │   └── vrf.py                    # verifiable-random-function stand-in (§III-H, Eq. (18))
 │   ├── identity/                     # §III-C
 │   │   ├── agent_card.py             # build/sign/verify Card_i (Eq. (4)-(5))
 │   │   ├── attestation.py            # envHash, EnvAttest
@@ -223,29 +227,29 @@ CG-ATC/
 │   ├── capability/                   # §III-E
 │   │   ├── token.py                  # cap_{i,j,t} structure (Eq. (9))
 │   │   ├── authority.py              # Policy Authority, σ_PA issuance (Eq. (10))
-│   │   └── enforcer.py               # Allow(i, a, cap) enforcement gate (§III-I Eq. (32))
+│   │   └── enforcer.py               # Allow(i, a, cap) enforcement gate (§IV Eq. (32))
 │   ├── audit/                        # §III-F
 │   │   ├── hashchain.py              # L_i^t = H(L_i^{t-1} ‖ ...) (Eq. (11))
 │   │   ├── merkle.py                 # root_i^t (Eq. (12)) + inclusion proofs
 │   │   └── committer.py              # Σ_i^t signature and external commitment (Eq. (13))
 │   ├── detection/                    # §III-G
-│   │   ├── crypto_detector.py        # cryptographic detection (§III-G-1: 10 conditions)
-│   │   ├── behavioral_detector.py    # behavioral detection (§III-G-2)
+│   │   ├── crypto_detector.py        # cryptographic detection (§III-G: 10 conditions)
+│   │   ├── behavioral_detector.py    # behavioral detection (§III-G)
 │   │   └── risk_score.py             # R_i^{t+1} computation (Eq. (14))
 │   ├── containment/                  # §III-H
 │   │   ├── scope_reducer.py          # dynamic scope reduction (Eq. (15), 7 stages)
 │   │   ├── impact_radius.py          # Impact(A_i, t) computation (Eq. (16))
 │   │   └── threshold_authz.py        # threshold authorization (Eq. (17)), VRF committee (Eq. (18))
-│   ├── a2a_integration/              # §III-J
+│   ├── a2a_integration/              # §V-A
 │   │   ├── headers.py                # the 6 A2A extension headers
 │   │   ├── middleware.py             # send/receive extension layer
 │   │   ├── asgi_middleware.py        # ASGI hook for FastAPI/uvicorn JSON-RPC servers
 │   │   ├── strands_bridge.py         # binding to strands-agents / a2a-sdk
-│   │   └── workflow.py               # the 11-step workflow of §III-J
+│   │   └── workflow.py               # the 11-step workflow of §V-A
 │   ├── policy/
 │   │   ├── policy_dsl.py             # DSL parser for policy Π (dict + YAML front-ends)
 │   │   └── evaluator.py
-│   └── baselines/                    # the 5 baselines of §III-L
+│   └── baselines/                    # the 5 baselines of §V
 │       ├── base.py                   # common pluggable interface
 │       ├── auth_only.py
 │       ├── tls_oauth.py
@@ -268,7 +272,7 @@ CG-ATC/
 │   │   ├── test_worm_propagation.py
 │   │   └── test_contagious_jailbreak.py
 │   └── e2e/                          # 3 tests — HTTP JSON-RPC full path
-├── experiments/                      # §III-L evaluation scripts (take no arguments)
+├── experiments/                      # §V evaluation scripts (take no arguments)
 │   ├── bench_crypto_overhead.py
 │   ├── bench_audit_overhead.py
 │   ├── eval_detection_perf.py
@@ -319,8 +323,8 @@ it matches the paper.
 | 4. Audit | `audit/{hashchain,merkle,committer}.py` | §III-F, Eq. (11)-(13) | Complete. `L_i^t`, `root_i^t`, inclusion proofs, signed commitment `Σ_i^t`, `verify()` for tamper detection |
 | 5. Detection | `detection/{crypto_detector,behavioral_detector,risk_score}.py` | §III-G, Eq. (14) | Complete. 10 cryptographic conditions, behavioral detectors, `R_i^{t+1}`. The aggregation of `B_i^t` is an interpretation — see `open_questions.md` Q2 |
 | 6. Containment | `containment/{scope_reducer,impact_radius,threshold_authz}.py`, `crypto/{threshold,vrf}.py` | §III-H, Eq. (15)-(18) | Functionally complete, **two primitives are stand-ins**: the k-of-n scheme is a Schnorr-style multi-signature proxy, not FROST, and the committee VRF is a signature-derived shuffle, not RFC 9381 (Q3/Q4) |
-| 7. A2A integration | `a2a_integration/*` | §III-J | Complete. 6 extension headers, 11-step workflow, ASGI middleware, `strands-agents` / `a2a-sdk` binding; exercised by `tests/e2e/` |
-| 8. Evaluation | `experiments/`, `benchmarks/`, `baselines/` | §III-L | Complete. See §6; all committed results under `results/` regenerate from a fixed seed |
+| 7. A2A integration | `a2a_integration/*` | §V-A | Complete. 6 extension headers, 11-step workflow, ASGI middleware, `strands-agents` / `a2a-sdk` binding; exercised by `tests/e2e/` |
+| 8. Evaluation | `experiments/`, `benchmarks/`, `baselines/` | §V | Complete. See §6; all committed results under `results/` regenerate from a fixed seed |
 
 Parameters `λ, α, β, γ, δ` and the thresholds `τ` are defined in
 `cgatc/core/constants.py` and are overridable per-instance at construction time.
@@ -370,20 +374,20 @@ is the seam where one would be added.
 
 The 7 principles of paper §III-B translated into coding rules:
 
-1. **No implicit trust** (§III-B-1): explicit verification at the entry point of every
+1. **No implicit trust** (§III-B principle 1): explicit verification at the entry point of every
    public function. Comments such as "we trust the caller" are forbidden.
-2. **Cryptographic identity** (§III-B-2): AgentID is an immutable value object. Do not
+2. **Cryptographic identity** (§III-B principle 2): AgentID is an immutable value object. Do not
    pass raw `bytes` around.
-3. **Signed & causally linked** (§III-B-3): the message-send API has no "send without
+3. **Signed & causally linked** (§III-B principle 3): the message-send API has no "send without
    signature" overload. `prevHash` is mandatory.
-4. **Capability least privilege** (§III-B-4): privileged access that does not require a
+4. **Capability least privilege** (§III-B principle 4): privileged access that does not require a
    capability must not exist. Default deny.
-5. **Tamper-evident** (§III-B-5): every state change is recorded in the audit log. Do
+5. **Tamper-evident** (§III-B principle 5): every state change is recorded in the audit log. Do
    not create code paths that skip log writes.
-6. **Threshold for high-risk** (§III-B-6): the list of high-risk actions is stated
+6. **Threshold for high-risk** (§III-B principle 6): the list of high-risk actions is stated
    explicitly in `cgatc/containment/threshold_authz.py`, and the type system
    prevents executing them with a single signature.
-7. **Dynamic containment** (§III-B-7): risk score and scope must be referenceable from
+7. **Dynamic containment** (§III-B principle 7): risk score and scope must be referenceable from
    separate services; do not hard-code them.
 
 ### 4.4 Naming conventions
@@ -423,13 +427,13 @@ The 7 principles of paper §III-B translated into coding rules:
 |---|---|---|
 | Unit | `tests/unit/` | Behavior of individual functions and classes |
 | Integration | `tests/integration/` | Cross-module interaction (e.g. issue → sign → verify → audit) |
-| **Security properties** | `tests/security/` | **The four theorems of paper §III-I, one file per theorem (18 tests)** |
+| **Security properties** | `tests/security/` | **The four theorems of paper §IV, one file per theorem (18 tests)** |
 | Adversarial scenarios | `tests/adversarial/` | Concrete attack scenarios from §III-A and confirmation of defenses (13 tests) |
 | E2E | `tests/e2e/` | Full path over the A2A protocol |
 
-### 5.2 Security-property tests (§III-I, Theorems 1-4)
+### 5.2 Security-property tests (§IV, Theorems 1-4)
 
-Paper §III-I formalizes four security properties as challenger-adversary games
+Paper §IV formalizes four security properties as challenger-adversary games
 (`Exp^{auth}`, `Exp^{audit}`, `Exp^{cap}`, `Exp^{thr}`) and proves Theorems 1-4
 against them. `tests/security/` contains one file per theorem, 18 tests in total.
 
@@ -457,14 +461,14 @@ which are assumed, not tested. Breaking Ed25519 is out of scope by construction.
 
 | Theorem | File | Property exercised |
 |---|---|---|
-| 1 — Message authenticity (§III-D-1) | `test_theorem1_message_authenticity.py` | No envelope verifies under Alice's `pk` without Alice's `sk`; tampering any field invalidates the signature |
-| 2 — Tamper-evident auditability (§III-F, §III-I) | `test_theorem2_audit_tamper_evidence.py` | Deleting, modifying, reordering or inserting log entries is detected by the hash chain / Merkle root |
-| 3 — Capability-bounded damage (§III-E, §III-I) | `test_theorem3_capability_bounded_damage.py` | A corrupted agent cannot act outside `∪ Scope(cap)`; wrong audience/subject/task/expiry are all denied |
-| 4 — Threshold-protected actions (§III-H-3, §III-I) | `test_theorem4_threshold_protected_actions.py` | Fewer than `k` signers cannot authorize a high-risk action |
+| 1 — Message authenticity (§III-D) | `test_theorem1_message_authenticity.py` | No envelope verifies under Alice's `pk` without Alice's `sk`; tampering any field invalidates the signature |
+| 2 — Tamper-evident auditability (§III-F, §IV) | `test_theorem2_audit_tamper_evidence.py` | Deleting, modifying, reordering or inserting log entries is detected by the hash chain / Merkle root |
+| 3 — Capability-bounded damage (§III-E, §IV) | `test_theorem3_capability_bounded_damage.py` | A corrupted agent cannot act outside `∪ Scope(cap)`; wrong audience/subject/task/expiry are all denied |
+| 4 — Threshold-protected actions (§III-H, §IV) | `test_theorem4_threshold_protected_actions.py` | Fewer than `k` signers cannot authorize a high-risk action |
 
 Building explicit `Challenger` / `Adversary` game simulators, driven by `hypothesis`
 over randomized corrupt sets and query budgets, would make the correspondence to
-§III-I's formalism literal rather than argued. It remains future work; the current
+§IV's formalism literal rather than argued. It remains future work; the current
 tests cover the same properties at a coarser granularity.
 
 ### 5.3 Adversarial scenario tests
@@ -528,10 +532,10 @@ the latter would not apply anyway, since the VRF is a stand-in (§4.2).
 ## 6. Experiment and evaluation script layout
 
 Evaluation is split across two suites. `experiments/` covers the six axes of
-paper §III-L. `benchmarks/` is the later adaptive-attack suite, specified in
+paper §V. `benchmarks/` is the later adaptive-attack suite, specified in
 `docs/spec_additional_experiments_and_baselines.pdf` and described in §6.5.
 
-### 6.1 Evaluation axes and scripts (§III-L)
+### 6.1 Evaluation axes and scripts (§V)
 
 Every script in `experiments/` takes **no command-line arguments** — it runs a fixed,
 seeded configuration and writes to `results/<YYYYMMDD>_<experiment>/`. Passing
@@ -552,9 +556,9 @@ driver: robustness is asserted by the adversarial tests and *measured* by the
 adaptive-attack suite, and deployability is demonstrated by the e2e tests and the
 runnable examples.
 
-### 6.2 Baseline comparison (§III-L)
+### 6.2 Baseline comparison (§V)
 
-The five baselines of §III-L are implemented pluggably under `cgatc/baselines/`
+The five baselines of §V are implemented pluggably under `cgatc/baselines/`
 behind the common interface in `base.py`, and compared on an identical workload by
 `experiments/compare_baselines.py`:
 
@@ -568,7 +572,7 @@ The adaptive-attack suite adds five stronger baselines on top of these (§6.5).
 
 ### 6.3 Workload generation
 
-`experiments/workloads/` holds the §III-L workloads: `benign.py` (delegation chains,
+`experiments/workloads/` holds the §V workloads: `benign.py` (delegation chains,
 parallel queries, long-lived sessions) and `adversarial.py` (single attacker,
 collusion, worm prompts, memory poisoning). `scale_eval.py` drives them at
 10 / 100 / 1000 agents.
@@ -667,11 +671,11 @@ policy Π), implement a conservative provisional version and record it in
 unilaterally settle on a specification that conflicts with the paper.
 
 The following in particular are not made explicit in the paper:
-- The concrete verification steps of `VerifyLog` (referenced by §III-I Game 2, but the
+- The concrete verification steps of `VerifyLog` (referenced by §IV Game 2, but the
   definition must be inferred from the structure in §III-F)
 - Normalization and feature extraction for the behavioral anomaly score `B_i^t`
 - The concrete DSL/format of policy Π
-- The boundary of the "trusted enforcement layer" mentioned in §III-I (definition of the
+- The boundary of the "trusted enforcement layer" mentioned in §IV (definition of the
   state-transition semantics)
 
 ---

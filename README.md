@@ -44,7 +44,7 @@ cgatc/
   policy/          policy DSL + evaluator
 tests/
   unit/, integration/, security/, adversarial/, e2e/
-experiments/       evaluation scripts (§III-L)
+experiments/       evaluation scripts (§V)
 examples/          end-to-end demos
 ```
 

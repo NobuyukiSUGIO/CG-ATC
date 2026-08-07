@@ -31,7 +31,7 @@ TAU_2: Final[float] = 2.5   # restrict outputs / disable high-risk tools
 TAU_3: Final[float] = 5.0   # prohibit delegation, switch to read-only
 TAU_4: Final[float] = 10.0  # isolate / revoke
 
-# --- impact radius (§III-H-2) ---------------------------------------------
+# --- impact radius (§III-H) ---------------------------------------------
 DEFAULT_MAX_RADIUS: Final[int] = 3
 SUSPICIOUS_MAX_RADIUS: Final[int] = 1
 ISOLATED_MAX_RADIUS: Final[int] = 0
@@ -39,7 +39,7 @@ ISOLATED_MAX_RADIUS: Final[int] = 0
 # --- capability defaults (§III-E) -----------------------------------------
 DEFAULT_CAPABILITY_TTL_SECONDS: Final[int] = 600  # 10 min, "short-lived"
 
-# --- A2A metadata header names (§III-J) -----------------------------------
+# --- A2A metadata header names (§V-A) -----------------------------------
 HDR_AGENT_ID: Final[str] = "A2A-Agent-ID"
 HDR_SIGNATURE: Final[str] = "A2A-Signature"
 HDR_CAPABILITY_TOKEN: Final[str] = "A2A-Capability-Token"

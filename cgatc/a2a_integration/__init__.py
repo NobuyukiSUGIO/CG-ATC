@@ -1,4 +1,4 @@
-"""CG-ATC integration with the A2A protocol and Strands Agents (paper §III-J)."""
+"""CG-ATC integration with the A2A protocol and Strands Agents (paper §V-A)."""
 
 from .asgi_middleware import CGATCMiddleware
 from .headers import decode, encode

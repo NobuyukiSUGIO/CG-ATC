@@ -1,4 +1,4 @@
-"""Crypto-overhead benchmark (paper §III-L).
+"""Crypto-overhead benchmark (paper §V).
 
 Measures per-operation latency and throughput for:
     * Ed25519 sign / verify
@@ -78,7 +78,7 @@ def main() -> None:
         print(f"{r['op']:32s} mean={r['mean_us']:8.1f}us  p95={r['p95_us']:8.1f}us  "
               f"thru={r['throughput_per_s']:8.0f}/s")
 
-    # ---- message-size measurements (paper §III-L "message size") -----------
+    # ---- message-size measurements (paper §V "message size") -----------
     sizes = _measure_message_sizes(kp, pa, a, b, task)
     print("\n[ message size, bytes ]")
     for k, v in sizes.items():

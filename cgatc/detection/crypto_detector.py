@@ -1,6 +1,6 @@
-"""Cryptographic detection (paper §III-G-1).
+"""Cryptographic detection (paper §III-G).
 
-Maps the ten enumerated rejection conditions of §III-G-1 to numeric
+Maps the ten enumerated rejection conditions of §III-G to numeric
 contributions to the *cryptographic violation score* `C_i^t` used by
 `risk_score.RiskScoreUpdater`.
 
@@ -29,7 +29,7 @@ from ..core.exceptions import (
 
 
 class CryptoViolationKind(str, Enum):
-    """The 10 conditions enumerated in paper §III-G-1."""
+    """The 10 conditions enumerated in paper §III-G."""
 
     INVALID_SIGNATURE = "invalid_signature"
     EXPIRED_OR_FORGED_CAPABILITY = "expired_or_forged_capability"

@@ -1,4 +1,4 @@
-"""Dynamic capability reduction (paper §III-H-1).
+"""Dynamic capability reduction (paper §III-H).
 
 Implements the seven-stage gradual containment ladder:
 
@@ -109,7 +109,7 @@ class ScopeReducer:
 def restrict_scopes(scopes: list[str], level: ContainmentLevel) -> list[str]:
     """Return a filtered scope list for the given containment level.
 
-    Implements `Scopes_i^{t+1} = Scopes_i^t \\ HighRiskScopes` (paper §III-H-1).
+    Implements `Scopes_i^{t+1} = Scopes_i^t \\ HighRiskScopes` (paper §III-H).
     The "high risk" tag is encoded as a `*.high_risk.*` substring in the scope
     name; deployments can adapt the predicate to their own taxonomy.
     """

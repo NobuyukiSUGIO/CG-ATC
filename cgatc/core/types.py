@@ -121,7 +121,7 @@ class MessageType(str, Enum):
 
 
 class ContainmentLevel(int, Enum):
-    """Seven-stage gradual containment ladder (paper §III-H-1, items 1-7)."""
+    """Seven-stage gradual containment ladder (paper §III-H, items 1-7)."""
 
     NORMAL = 0
     INCREASED_MONITORING = 1

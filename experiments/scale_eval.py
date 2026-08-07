@@ -8,7 +8,7 @@ agent-population sizes and records:
 
 We deliberately do NOT call any LLM here so the experiment is free
 to run at 1000-agent scale; CG-ATC's per-message overhead is
-LLM-independent (paper §III-L).
+LLM-independent (paper §V).
 """
 
 from __future__ import annotations

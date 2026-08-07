@@ -215,7 +215,7 @@ def verify_envelope(
 
 
 def encode_envelope_header(signed: SignedEnvelope) -> dict[str, Any]:
-    """Encode an envelope+signature as A2A metadata headers (paper §III-J).
+    """Encode an envelope+signature as A2A metadata headers (paper §V-A).
 
     Returns a dict ready to be serialised into A2A request/response
     metadata (see `cgatc.a2a_integration.headers`).  Concretely we use a

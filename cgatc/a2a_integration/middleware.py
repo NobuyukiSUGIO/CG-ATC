@@ -1,4 +1,4 @@
-"""CG-ATC verification middleware (paper §III-J).
+"""CG-ATC verification middleware (paper §V-A).
 
 Single entry-point that bundles every per-message check defined in §III-D
 through §III-G:
@@ -94,7 +94,7 @@ class Middleware:
         self.impact = impact or ImpactGraph()
         self.log = log or HashChainLog(my_agent_id)
         self._peers: dict[AgentID, _PeerKnown] = {}
-        # Cross-sender payload fingerprints (paper §III-G-2 "mass
+        # Cross-sender payload fingerprints (paper §III-G "mass
         # transmission of similar prompts to many agents").  Maps the
         # payload hash to the set of distinct senders that have presented
         # that payload to us recently.
@@ -125,7 +125,7 @@ class Middleware:
         action_scope: str,
         is_delegation: bool = False,
     ) -> VerificationResult:
-        """Run the full §III-J workflow on one inbound envelope.
+        """Run the full §V-A workflow on one inbound envelope.
 
         Returns a `VerificationResult` with `accepted=False` if any check
         fails; the failure is also recorded in the audit log and bumps
@@ -184,7 +184,7 @@ class Middleware:
 
         # Behavioural cross-sender payload-fingerprint check.  If many
         # distinct senders push the same bytes at us, that is the worm /
-        # contagious-jailbreak signal from paper §III-G-2.
+        # contagious-jailbreak signal from paper §III-G.
         fp = H(payload)
         seen_from = self._payload_fingerprints.setdefault(fp, set())
         seen_from.add(sender)

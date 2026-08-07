@@ -1,4 +1,4 @@
-"""Theorem 2 — Tamper-Evident Auditability (paper §III-F, §III-I).
+"""Theorem 2 — Tamper-Evident Auditability (paper §III-F, §IV-B).
 
 Statement (paraphrased): if the hash function is collision-resistant,
 then an adversary cannot modify a past audit event while preserving

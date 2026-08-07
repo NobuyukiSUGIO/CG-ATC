@@ -1,6 +1,6 @@
 """Baseline 4: behavioural anomaly detection only (no cryptographic evidence).
 
-Mirrors the §III-G-2 detector but operates over UNAUTHENTICATED traffic.
+Mirrors the §III-G detector but operates over UNAUTHENTICATED traffic.
 The receiver scores each delivery using simple anomaly heuristics
 (payload size spikes, repeated identical payloads, fan-out from one
 sender) and rejects when the score exceeds a static threshold.

@@ -1,7 +1,7 @@
-"""Threshold-protected high-risk action gate (paper §III-H-3).
+"""Threshold-protected high-risk action gate (paper §III-H).
 
 Wraps `crypto.threshold.MultiSigThresholdAuthority` with the policy
-enumeration of §III-H-3:
+enumeration of §III-H:
 
     * sending external emails
     * invoking external APIs
@@ -30,7 +30,7 @@ from ..crypto.threshold import (
 
 
 class HighRiskAction(str, Enum):
-    """The seven high-risk actions enumerated in paper §III-H-3."""
+    """The seven high-risk actions enumerated in paper §III-H."""
 
     SEND_EMAIL = "send_email"
     EXTERNAL_API = "external_api"

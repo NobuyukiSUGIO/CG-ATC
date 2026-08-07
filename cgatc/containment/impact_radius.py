@@ -1,4 +1,4 @@
-"""Impact radius (paper §III-H-2).
+"""Impact radius (paper §III-H).
 
     Impact(A_i, t) = { A_j | A_i ⤳ A_j within r signed message hops }
 

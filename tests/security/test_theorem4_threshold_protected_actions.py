@@ -1,4 +1,4 @@
-"""Theorem 4 — Threshold-Protected Critical Actions (paper §III-H-3, §III-I).
+"""Theorem 4 — Threshold-Protected Critical Action (paper §III-H, §IV-D).
 
 Statement (paraphrased): if the threshold signature scheme is unforgeable
 and the adversary compromises fewer than `k` signing parties, then the

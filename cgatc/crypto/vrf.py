@@ -1,4 +1,4 @@
-"""Pseudo-VRF for committee selection (paper §III-H-3).
+"""Pseudo-VRF for committee selection (paper §III-H).
 
     committee_t = VRF_{sk_PA}(taskID ‖ epoch)
 

@@ -1,4 +1,4 @@
-"""Integration test for the §III-J 11-step workflow.
+"""Integration test for the §V-A 11-step workflow.
 
 We do NOT spin up an HTTP server here; we exercise the workflow at the
 Python API level (Card → Handshake → Capability → Envelope → Verify).

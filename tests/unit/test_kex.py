@@ -1,4 +1,4 @@
-"""Unit tests for X25519 + HKDF session-key derivation (paper §III-J step 5)."""
+"""Unit tests for X25519 + HKDF session-key derivation (paper §V-A step 5)."""
 
 from __future__ import annotations
 

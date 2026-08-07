@@ -28,7 +28,7 @@ Weights `α, β, γ, δ, λ` are externalised in
 `cgatc/detection/risk_score.py` and `examples/configs/risk.yaml` so
 researchers can re-tune them without code changes.
 
-## Q3. Threshold scheme (§III-H-3)
+## Q3. Threshold scheme (§III-H, *Threshold authorization*)
 
 **Paper.** Mentions "k-of-n threshold signature" generically (e.g. FROST,
 BLS).
@@ -41,7 +41,7 @@ replace it via the `ThresholdAuthority` protocol; tests in
 `tests/security/test_theorem4_*` are written against the protocol, not
 the implementation, so the swap is mechanical.
 
-## Q4. VRF for committee selection (§III-H-3)
+## Q4. VRF for committee selection (§III-H, *Threshold authorization*)
 
 **Paper.** `committee_t = VRF_{sk_PA}(taskID ‖ epoch)`.
 
@@ -51,28 +51,44 @@ seed with Ed25519 and the receiver derives a deterministic shuffle from
 public output is unforgeable but lacks the formal "VRF proof" structure.
 Replacing it with a real RFC 9381 VRF is tracked separately.
 
-## Q5. Section numbers for "Novelty and Advantages" and the Conclusion
+## Q5. Section numbering (resolved — recorded so the drift does not recur)
 
-**Context.** `CLAUDE.md` originally used an older numbering in which the
-proposed scheme was §I, the security properties §II, and the evaluation
-§III.  The paper now places the whole scheme in §III (§III-A ... §III-L),
-which is the numbering already used by the code, `README.md`, and
-`docs/paper_mapping.md`.  `CLAUDE.md` has been renumbered to match.
+Not an interpretation gap: a documentation defect that took two passes to
+fix, kept here because the failure mode is easy to repeat.
 
-**Confirmed mappings** (from `docs/paper_mapping.md` and the docstrings in
-`tests/security/`): §I-A..§I-H → §III-A..§III-H, §II → §III-I,
-old §III-A → §III-J, old §III-B → §III-L.
+**What happened.** The manuscript was restructured during writing. An early
+draft put the proposed scheme in §I, the security properties in §II, and the
+evaluation in §III. From the 2026-04-27 draft onward the structure became
+§I Introduction / §II Related Work / §III Proposed Scheme / §IV Security
+Properties / §V Evaluation / §VI Discussion / §VII Conclusion.
 
-**Unresolved.**
+The repository tracked neither state cleanly. `docs/paper_mapping.md` had
+§III-A..§III-H right but placed the security properties at §III-I, the
+implementation at §III-J and the evaluation at §III-L — a numbering no draft
+ever used. `CLAUDE.md` was still on the earliest §I/§II/§III scheme. A first
+pass renumbered `CLAUDE.md` to agree with `paper_mapping.md`, which
+propagated that file's error instead of fixing it, because the manuscript
+itself was never consulted.
 
-1. *Novelty and Advantages* (old §I-I) was renumbered to **§III-K** by
-   inference only: §III-K is the sole gap between §III-J (Implementation)
-   and §III-L (Evaluation Plan), and `docs/paper_mapping.md` omits it.
-   No code or doc references §III-K, so this is unverified.
-2. The *Conclusion* is still written as **§IV** and was left untouched.
-   If the paper's top-level structure is §I Introduction / §II Related
-   work / §III Proposed scheme / §IV Conclusion, this is already correct;
-   if a section was inserted, it may need to become §V.
+**Current mapping**, taken from the 2026-08-05 manuscript directly:
 
-Both should be checked against the manuscript before submission.  Neither
-affects code behaviour — they appear only in `CLAUDE.md` prose.
+| was | is |
+|---|---|
+| §III-A .. §III-H | unchanged (these were always correct) |
+| §III-I (security properties) | **§IV** |
+| §III-J (implementation) | **§V-A** |
+| §III-K (novelty — an inference, never in any draft) | **§III-I** |
+| §III-L (evaluation) | **§V** |
+| §IV (conclusion) | **§VII** |
+| §III-B-n, §III-D-1, §III-G-n, §III-H-n | parent subsection — see below |
+
+**No `\subsubsection` exists in the manuscript.** Within a subsection it uses
+bold paragraphs (`\textbf{Cryptographic detection}`) or an `enumerate` (the
+seven design principles). References such as §III-G-1 or §III-H-3 therefore
+never resolved to anything; they have been collapsed to §III-G and §III-H,
+and the paragraph is named in prose instead.
+
+**Rule.** `docs/paper_mapping.md` is derived from the manuscript, not the
+other way round. When the paper is revised, re-derive it by reading the
+section headings, then propagate to `CLAUDE.md` and the docstrings. Do not
+renumber one document to agree with another.

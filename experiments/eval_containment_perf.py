@@ -1,8 +1,8 @@
-"""Containment performance evaluation (paper §III-L).
+"""Containment performance evaluation (paper §V).
 
 Measures the size of the impact set (`Impact(A_i, t)`) and the
 propagation depth before and after CG-ATC's containment ladder
-(§III-H-1) is engaged.
+(§III-H) is engaged.
 
 Workload: a star topology where one attacker `worm-0` tries to send to
 `fanout` peers, then escalates risk so the scope reducer drives it to

@@ -1,4 +1,4 @@
-"""ECDH key exchange + HKDF for session keys (paper §III-J step 5).
+"""ECDH key exchange + HKDF for session keys (paper §V-A step 5).
 
 The handshake derives a 32-byte session key as
 

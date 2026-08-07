@@ -1,6 +1,6 @@
 """ASGI middleware that runs CG-ATC verification on inbound A2A requests.
 
-This realises the runtime side of paper §III-J: the CG-ATC layer sits
+This realises the runtime side of paper §V-A: the CG-ATC layer sits
 *between* the network and the Strands `A2AServer`, intercepting every
 JSON-RPC POST, parsing the embedded A2A `Message`, decoding the
 CG-ATC fields from its `metadata` dict, and running the full

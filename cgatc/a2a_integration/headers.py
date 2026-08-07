@@ -1,4 +1,4 @@
-"""A2A metadata-header encoding for CG-ATC (paper §III-J).
+"""A2A metadata-header encoding for CG-ATC (paper §V-A).
 
 The paper proposes the following A2A metadata fields:
 
@@ -46,7 +46,7 @@ def encode(
     If `sender_middleware` is supplied, the optional `A2A-Log-Root` and
     `A2A-Risk-Level` headers are auto-populated from the sender's
     current audit-log head and self-perceived containment level
-    (paper §III-J).  Explicit `log_root_hex` / `risk_level` override
+    (paper §V-A).  Explicit `log_root_hex` / `risk_level` override
     the auto-derived values.
     """
 
